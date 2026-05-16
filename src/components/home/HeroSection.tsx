@@ -1,12 +1,10 @@
-import Link from "next/link";
-import { format } from "date-fns";
-import { bn as bnLocale } from "date-fns/locale";
-import { ArrowRight, Clock } from "lucide-react";
 import { mockArticles } from "@/lib/data";
 import { fetchRealNews } from "@/lib/api";
-import { CategoryBadge } from "@/components/ui/CategoryBadge";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { getTranslation } from "@/lib/i18n-utils";
+import HeroSlider from "./HeroSlider";
 import { NewsCard } from "@/components/shared/NewsCard";
-import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
 
 export async function HeroSection({ locale = 'bn' }: { locale?: string }) {
   const isBangla = locale === 'bn';
@@ -15,20 +13,13 @@ export async function HeroSection({ locale = 'bn' }: { locale?: string }) {
   const realNews = await fetchRealNews();
   const allArticles = Array.isArray(realNews) && realNews.length > 0 ? realNews : mockArticles;
   
-  const featuredArticle = allArticles.find(a => a.featured) || allArticles[0];
-  const sideArticles = allArticles.filter(a => (a.id) !== (featuredArticle.id)).slice(0, 4);
-
-  if (!featuredArticle) return null;
-
-  const title = getLocalizedContent<string>(featuredArticle.title, locale);
-  const excerpt = getLocalizedContent<string>(featuredArticle.excerpt, locale);
-  const category = getLocalizedContent<string>(featuredArticle.category, locale);
-  const slug = getLocalizedContent<string>(featuredArticle.slug, locale);
-  const readTime = getLocalizedContent<string>(featuredArticle.readTime || "", locale);
-
-  const formattedDate = format(new Date(featuredArticle.date), isBangla ? 'd MMMM, yyyy' : 'MMMM d, yyyy', {
-    locale: isBangla ? bnLocale : undefined
-  });
+  // Get multiple featured articles for the slider
+  const featuredArticles = allArticles.filter(a => a.featured).slice(0, 5);
+  if (featuredArticles.length === 0) {
+    featuredArticles.push(allArticles[0]);
+  }
+  
+  const sideArticles = allArticles.filter(a => !featuredArticles.find(f => f.id === a.id)).slice(0, 4);
 
   return (
     <section className="py-6 md:py-10 border-b border-border bg-background relative overflow-hidden">
@@ -37,51 +28,9 @@ export async function HeroSection({ locale = 'bn' }: { locale?: string }) {
       
       <div className="container relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-          {/* Main Hero Story - Large & Powerful */}
-          <div className="lg:col-span-8 group">
-            <Link href={`/${locale}/news/${slug}`} className="block relative w-full aspect-[16/9] md:aspect-[16/8.5] overflow-hidden rounded-3xl shadow-premium border border-border/50">
-              <img 
-                src={featuredArticle.image} 
-                alt={title}
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-              />
-              {/* Cinematic Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
-              
-              <div className="absolute bottom-0 left-0 p-6 md:p-12 md:w-11/12">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="bg-primary text-white text-[10px] md:text-[11px] font-black uppercase px-3 py-1 tracking-[0.2em] rounded-sm shadow-lg">
-                    {isBangla ? "ফিচারড স্টোরি" : "Featured Story"}
-                  </span>
-                  <CategoryBadge category={category} className="text-white mb-0 border-l border-white/20 pl-3 py-0.5" />
-                </div>
-
-                <h1 className="font-serif font-bold text-3xl md:text-5xl lg:text-6xl leading-[1.1] mb-4 text-white group-hover:text-primary transition-colors duration-500">
-                  {title}
-                </h1>
-                
-                <p className="text-white/80 text-sm md:text-lg line-clamp-2 mb-8 max-w-3xl leading-relaxed font-sans">
-                  {excerpt}
-                </p>
-                
-                <div className="flex items-center gap-6 text-xs font-bold uppercase tracking-widest text-white/60 border-t border-white/10 pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/50 p-0.5">
-                      <img src={featuredArticle.author.avatar} alt={featuredArticle.author.name} className="w-full h-full object-cover rounded-full" />
-                    </div>
-                    <span className="text-white tracking-normal">{featuredArticle.author.name}</span>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-2">
-                    <Clock size={14} className="text-primary" />
-                    <span>{formattedDate}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-                    <span>{readTime || (isBangla ? '৫ মিনিট পাঠ' : '5 min read')}</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
+          {/* Main Hero Slider */}
+          <div className="lg:col-span-8">
+            <HeroSlider articles={featuredArticles} locale={locale} />
           </div>
 
           {/* Sidebar - High Density Editorial Grid */}
