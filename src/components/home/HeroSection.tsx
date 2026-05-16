@@ -15,8 +15,8 @@ export async function HeroSection({ locale = 'bn' }: { locale?: string }) {
   const realNews = await fetchRealNews();
   const allArticles = Array.isArray(realNews) && realNews.length > 0 ? realNews : mockArticles;
   
-  const featuredArticle = allArticles.find(a => a.isFeatured || a.featured) || allArticles[0];
-  const sideArticles = allArticles.filter(a => (a._id || a.id) !== (featuredArticle._id || featuredArticle.id)).slice(0, 4);
+  const featuredArticle = allArticles.find(a => a.featured) || allArticles[0];
+  const sideArticles = allArticles.filter(a => (a.id) !== (featuredArticle.id)).slice(0, 4);
 
   if (!featuredArticle) return null;
 
@@ -26,7 +26,7 @@ export async function HeroSection({ locale = 'bn' }: { locale?: string }) {
   const slug = getLocalizedContent<string>(featuredArticle.slug, locale);
   const readTime = getLocalizedContent<string>(featuredArticle.readTime || "", locale);
 
-  const formattedDate = format(new Date(featuredArticle.createdAt || featuredArticle.date), isBangla ? 'd MMMM, yyyy' : 'MMMM d, yyyy', {
+  const formattedDate = format(new Date(featuredArticle.date), isBangla ? 'd MMMM, yyyy' : 'MMMM d, yyyy', {
     locale: isBangla ? bnLocale : undefined
   });
 
@@ -41,7 +41,7 @@ export async function HeroSection({ locale = 'bn' }: { locale?: string }) {
           <div className="lg:col-span-8 group">
             <Link href={`/${locale}/news/${slug}`} className="block relative w-full aspect-[16/9] md:aspect-[16/8.5] overflow-hidden rounded-3xl shadow-premium border border-border/50">
               <img 
-                src={featuredArticle.mainImage || featuredArticle.image} 
+                src={featuredArticle.image} 
                 alt={title}
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
               />

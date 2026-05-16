@@ -16,20 +16,26 @@ export async function fetchRealNews(): Promise<Article[]> {
       const imageUrl = item.thumbnail || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=1200';
       
       // Slugify title
-      const slug = item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      const slugStr = item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      const titleStr = item.title;
+      const excerptStr = item.description || item.title;
+      const contentStr = `<p>${item.content || item.description}</p><p><a href="${item.link}" target="_blank" rel="noopener noreferrer">Read full original article on BBC</a></p>`;
 
       return {
         id: `real-${index}`,
-        slug: slug,
-        title: item.title,
-        excerpt: item.description || item.title,
-        content: `<p>${item.content || item.description}</p><p><a href="${item.link}" target="_blank" rel="noopener noreferrer">Read full original article on BBC</a></p>`,
-        category: 'World', // Defaulting to World for BBC
+        slug: { en: slugStr, bn: slugStr },
+        title: { en: titleStr, bn: titleStr },
+        excerpt: { en: excerptStr, bn: excerptStr },
+        content: { en: contentStr, bn: contentStr },
+        category: 'world', // Using category ID from data.ts
         author: authors[Math.floor(Math.random() * authors.length)], // Randomize author for realistic look
         date: item.pubDate || new Date().toISOString(),
-        readTime: `${Math.floor(Math.random() * 5) + 3} min read`,
+        readTime: { en: `${Math.floor(Math.random() * 5) + 3} min read`, bn: `${Math.floor(Math.random() * 5) + 3} মিনিট পাঠ` },
         image: imageUrl,
-        tags: ['World News', 'Breaking'],
+        tags: [
+          { en: 'World News', bn: 'বিশ্ব সংবাদ' },
+          { en: 'Breaking', bn: 'ব্রেকিং নিউজ' }
+        ],
         type: 'standard'
       } as Article;
     });

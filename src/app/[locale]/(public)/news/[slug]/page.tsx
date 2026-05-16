@@ -136,11 +136,18 @@ export default async function NewsDetailsPage({ params }: { params: Promise<{ sl
               <span className="font-bold text-sm uppercase tracking-wider text-title">
                 {isBangla ? 'বিষয়বস্তু:' : 'Topics:'}
               </span>
-              {article.tags.map(tag => (
-                <Link key={tag} href={`/${locale}/search?q=${tag}`} className="bg-surface text-body px-4 py-1.5 text-sm font-semibold hover:bg-primary hover:text-white transition-colors rounded-sm border border-border">
-                  {tag}
-                </Link>
-              ))}
+              {article.tags.map((tag, i) => {
+                const localizedTag = getLocalizedContent<string>(tag, locale);
+                return (
+                  <Link 
+                    key={i} 
+                    href={`/${locale}/search?q=${encodeURIComponent(localizedTag)}`} 
+                    className="bg-surface text-body px-4 py-1.5 text-sm font-semibold hover:bg-primary hover:text-white transition-colors rounded-sm border border-border"
+                  >
+                    {localizedTag}
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Elegant Author Bio Box */}
