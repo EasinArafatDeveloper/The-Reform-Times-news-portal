@@ -2,15 +2,34 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Menu, X, Moon } from 'lucide-react';
-import { navigationLinks } from '@/lib/data';
+import { Search, Menu, X, Moon, ChevronDown } from 'lucide-react';
+import { navigationLinks, categories, uiTranslations } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [locale, setLocale] = useState('en');
   const pathname = usePathname();
+
+  useEffect(() => {
+    const handleLocaleChange = (e: any) => {
+      setLocale(e.detail);
+    };
+
+    const match = document.cookie.match(new RegExp('(^| )NEXT_LOCALE=([^;]+)'));
+    if (match) setLocale(match[2]);
+
+    window.addEventListener('localeChange', handleLocaleChange);
+    return () => window.removeEventListener('localeChange', handleLocaleChange);
+  }, [pathname]);
+
+  const t = uiTranslations[locale as keyof typeof uiTranslations] || uiTranslations.en;
+
+  const mainLinkUrls = navigationLinks.map(link => link.href);
+  const dropdownCategories = categories.filter(cat => !mainLinkUrls.includes(`/category/${cat.slug}`) && cat.slug !== 'investigations' && cat.slug !== 'fact-check');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,9 +65,37 @@ export function Navbar() {
                 pathname === link.href ? "text-brand-red" : "text-brand-navy/80"
               )}
             >
-              {link.name}
+              {locale === 'bn' ? link.bnName : link.name}
             </Link>
           ))}
+          
+          {/* More Dropdown */}
+          <div 
+            className="relative group"
+            onMouseEnter={() => setIsDropdownOpen(true)}
+            onMouseLeave={() => setIsDropdownOpen(false)}
+          >
+            <button className="flex items-center gap-1 text-sm font-semibold tracking-wide uppercase text-brand-navy/80 hover:text-brand-red transition-colors focus:outline-none">
+              {t.more} <ChevronDown size={14} />
+            </button>
+            
+            <div className={cn(
+              "absolute top-full left-0 mt-0 pt-6 w-48 transition-all duration-200",
+              isDropdownOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-2"
+            )}>
+              <div className="bg-white border border-gray-100 shadow-xl rounded-md overflow-hidden py-2">
+                {dropdownCategories.map(cat => (
+                  <Link
+                    key={cat.id}
+                    href={`/category/${cat.slug}`}
+                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-brand-red hover:bg-gray-50 transition-colors"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
         </nav>
 
         {/* Right Actions */}
@@ -63,7 +110,7 @@ export function Navbar() {
             href="/subscribe"
             className="hidden sm:inline-block bg-brand-red text-white px-5 py-2 text-sm font-semibold hover:bg-brand-red/90 transition-colors rounded-sm"
           >
-            Subscribe
+            {t.subscribe}
           </Link>
 
           {/* Mobile Menu Toggle */}
@@ -87,6 +134,17 @@ export function Navbar() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {link.name}
+            </Link>
+          ))}
+          {/* Mobile Dropdown Categories */}
+          {dropdownCategories.map((cat) => (
+            <Link 
+              key={cat.id} 
+              href={`/category/${cat.slug}`}
+              className="text-base font-semibold text-gray-500 hover:text-brand-red py-2 border-b border-gray-50 pl-4"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              {cat.name}
             </Link>
           ))}
           <Link 

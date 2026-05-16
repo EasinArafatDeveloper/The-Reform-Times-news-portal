@@ -1,9 +1,14 @@
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
 import { TwitterIcon, FacebookIcon, InstagramIcon, YoutubeIcon } from '@/components/ui/icons';
-import { categories } from '@/lib/data';
+import { categories, uiTranslations } from '@/lib/data';
+import { cookies } from 'next/headers';
 
-export function Footer() {
+export async function Footer() {
+  const cookieStore = await cookies();
+  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
+  const t = uiTranslations[locale as keyof typeof uiTranslations] || uiTranslations.en;
+
   return (
     <footer className="bg-brand-navy text-white pt-16 pb-8 border-t-[6px] border-brand-red">
       <div className="container">
@@ -29,9 +34,9 @@ export function Footer() {
 
           {/* Sections */}
           <div>
-            <h3 className="font-serif font-bold text-xl mb-6">Sections</h3>
+            <h3 className="font-serif font-bold text-xl mb-6">{t.sections}</h3>
             <ul className="space-y-3">
-              {categories.slice(0, 6).map((category) => (
+              {categories.map((category) => (
                 <li key={category.id}>
                   <Link href={`/category/${category.slug}`} className="text-gray-400 hover:text-white transition-colors text-sm font-medium">
                     {category.name}
@@ -43,21 +48,21 @@ export function Footer() {
 
           {/* Organization */}
           <div>
-            <h3 className="font-serif font-bold text-xl mb-6">Organization</h3>
+            <h3 className="font-serif font-bold text-xl mb-6">{t.organization}</h3>
             <ul className="space-y-3">
-              <li><Link href="/about" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">About Us</Link></li>
-              <li><Link href="/contact" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">Contact & Tips</Link></li>
-              <li><Link href="/editorial-policy" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">Editorial Policy</Link></li>
-              <li><Link href="/careers" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">Careers</Link></li>
-              <li><Link href="/transparency" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">Transparency Report</Link></li>
+              <li><Link href="/about" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">{t.aboutUs}</Link></li>
+              <li><Link href="/contact" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">{t.contactTips}</Link></li>
+              <li><Link href="/editorial-policy" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">{t.editorialPolicy}</Link></li>
+              <li><Link href="/careers" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">{t.careers}</Link></li>
+              <li><Link href="/transparency" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">{t.transparency}</Link></li>
             </ul>
           </div>
 
           {/* Newsletter */}
           <div>
-            <h3 className="font-serif font-bold text-xl mb-6">Newsletter</h3>
+            <h3 className="font-serif font-bold text-xl mb-6">{t.newsletter}</h3>
             <p className="text-gray-400 text-sm mb-4">
-              Get truth delivered weekly. Sign up for our top investigative stories.
+              {t.newsletterDesc}
             </p>
             <form className="flex flex-col gap-3">
               <div className="relative">
@@ -72,7 +77,7 @@ export function Footer() {
                 type="submit"
                 className="w-full bg-brand-red text-white py-3 font-semibold text-sm hover:bg-brand-red/90 transition-colors rounded-sm"
               >
-                Subscribe
+                {t.subscribe}
               </button>
             </form>
           </div>
@@ -81,12 +86,12 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-8 mt-12 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-500 text-sm">
-            &copy; {new Date().getFullYear()} The Reform Times. All rights reserved.
+            &copy; {new Date().getFullYear()} The Reform Times. {t.allRightsReserved}
           </p>
           <div className="flex gap-6 text-sm text-gray-500">
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="/cookies" className="hover:text-white transition-colors">Cookie Settings</Link>
+            <Link href="/privacy" className="hover:text-white transition-colors">{t.privacyPolicy}</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">{t.termsOfService}</Link>
+            <Link href="/cookies" className="hover:text-white transition-colors">{t.cookieSettings}</Link>
           </div>
         </div>
       </div>

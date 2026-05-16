@@ -1,14 +1,20 @@
 import Link from "next/link";
-import Image from "next/image";
 import { format } from "date-fns";
 import { ArrowRight } from "lucide-react";
-import { mockArticles } from "@/lib/data";
+import { mockArticles, banglaArticles, uiTranslations } from "@/lib/data";
 import { CategoryBadge } from "@/components/ui/CategoryBadge";
 import { NewsCard } from "@/components/shared/NewsCard";
+import { cookies } from 'next/headers';
 
-export function HeroSection() {
-  const featuredArticle = mockArticles.find(a => a.featured) || mockArticles[0];
-  const sideArticles = mockArticles.filter(a => !a.featured).slice(0, 3);
+export async function HeroSection() {
+  const cookieStore = await cookies();
+  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
+  const isBangla = locale === 'bn';
+  const t = uiTranslations[locale as keyof typeof uiTranslations] || uiTranslations.en;
+
+  const sourceArticles = isBangla ? banglaArticles : mockArticles;
+  const featuredArticle = sourceArticles.find(a => a.featured) || sourceArticles[0];
+  const sideArticles = sourceArticles.filter(a => !a.featured).slice(0, 3);
 
   return (
     <section className="py-8 md:py-12 border-b border-gray-200">
@@ -16,17 +22,15 @@ export function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Main Hero Story */}
           <div className="lg:col-span-8 group">
-            <Link href={`/news/${featuredArticle.slug}`} className="block relative w-full aspect-[16/10] md:aspect-[16/9] lg:aspect-[4/3] overflow-hidden mb-6">
-              <Image 
+            <Link href={`/news/${featuredArticle.slug}`} className="block relative w-full aspect-[16/10] md:aspect-[16/9] lg:aspect-[4/3] overflow-hidden mb-6 rounded-2xl shadow-2xl">
+              <img 
                 src={featuredArticle.image} 
                 alt={featuredArticle.title}
-                fill
-                priority
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
               
-              <div className="absolute bottom-0 left-0 p-6 md:p-8 md:w-4/5 text-white">
+              <div className="absolute bottom-0 left-0 p-8 md:p-12 md:w-5/6 text-white">
                 <CategoryBadge category={featuredArticle.category} className="text-brand-gold mb-4" />
                 <h1 className="font-serif font-bold text-3xl md:text-5xl leading-tight mb-4">
                   {featuredArticle.title}
@@ -37,10 +41,10 @@ export function HeroSection() {
                 
                 <div className="flex items-center gap-4 text-xs font-medium">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full overflow-hidden relative">
-                      <Image src={featuredArticle.author.avatar} alt={featuredArticle.author.name} fill className="object-cover" />
+                    <div className="w-8 h-8 rounded-full overflow-hidden relative border-2 border-white/20">
+                      <img src={featuredArticle.author.avatar} alt={featuredArticle.author.name} className="w-full h-full object-cover" />
                     </div>
-                    <span>{featuredArticle.author.name}</span>
+                    <span className="font-semibold">{featuredArticle.author.name}</span>
                   </div>
                   <span className="text-gray-400">&bull;</span>
                   <span className="text-gray-300">{format(new Date(featuredArticle.date), 'MMMM d, yyyy')}</span>

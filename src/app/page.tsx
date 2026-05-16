@@ -1,18 +1,37 @@
-import { mockArticles, trendingTopics, authors } from "@/lib/data";
+import { cookies } from "next/headers";
+import { mockArticles, trendingTopics, authors, Article, banglaArticles } from "@/lib/data";
+import { fetchRealNews } from "@/lib/api";
 import { HeroSection } from "@/components/home/HeroSection";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { NewsCard } from "@/components/shared/NewsCard";
-import Image from "next/image";
-import Link from "next/link";
 import { PlayCircle, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 
-export default function Home() {
-  const latestNews = mockArticles.slice(0, 4);
-  const advocacyNews = mockArticles.filter(a => a.category === 'Human Rights' || a.category === 'Environment').slice(0, 3);
-  const investigations = mockArticles.filter(a => a.type === 'investigation').slice(0, 2);
-  const factChecks = mockArticles.filter(a => a.type === 'fact-check').slice(0, 4);
-  const videos = mockArticles.filter(a => a.type === 'video').slice(0, 3);
-  const opinions = mockArticles.filter(a => a.type === 'opinion').slice(0, 4);
+export default async function Home() {
+  const cookieStore = await cookies();
+  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
+  const isBangla = locale === 'bn';
+
+  const realNews = await fetchRealNews();
+  const allArticles = [...realNews, ...mockArticles];
+  
+  // Smart merge: For every article in allArticles, check if there's a translated version in banglaArticles
+  const sourceArticles = isBangla 
+    ? allArticles.map(article => {
+        const translated = banglaArticles.find(ba => ba.id === article.id || ba.slug === article.slug);
+        if (translated) return translated;
+        // Fallback for untranslated: keep article but mark for translation if needed
+        return article;
+      })
+    : allArticles;
+  
+  const latestNews = sourceArticles.slice(0, 4);
+  const advocacyNews = sourceArticles.filter(a => a.category === 'Human Rights' || a.category === 'Environment' || a.category === 'Advocacy').slice(0, 3);
+  const investigations = sourceArticles.filter(a => a.type === 'investigation' || a.category === 'Investigations').slice(0, 2);
+  const factChecks = sourceArticles.filter(a => a.type === 'fact-check' || a.category === 'Fact Check').slice(0, 4);
+  const videos = sourceArticles.filter(a => a.type === 'video').slice(0, 3);
+  const opinions = sourceArticles.filter(a => a.type === 'opinion' || a.category === 'Opinion').slice(0, 4);
+  const bangladeshNews = isBangla ? banglaArticles : allArticles.slice(4, 8);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -24,8 +43,8 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <div className="lg:col-span-8">
               <SectionHeader 
-                title="Featured Reports" 
-                linkText="All Reports" 
+                title={isBangla ? "ফিচারড রিপোর্ট" : "Featured Reports"} 
+                linkText={isBangla ? "সব রিপোর্ট" : "All Reports"} 
                 linkHref="/news" 
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -45,13 +64,55 @@ export default function Home() {
             </div>
 
             <div className="lg:col-span-4">
-              <SectionHeader title="Latest Feed" />
-              <div className="flex flex-col gap-6">
-                {latestNews.map(article => (
+              <SectionHeader title={isBangla ? "লাইভ আপডেট" : "Latest Feed"} />
+              <div className="flex flex-col gap-8 lg:col-span-1">
+                {latestNews.slice(1).map((article, index) => (
                   <NewsCard key={article.id} article={article} layout="compact" />
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bangladesh / Bangla News Section */}
+      <section className="bg-brand-gray-light py-16 md:py-24 border-t border-b border-gray-200">
+        <div className="container max-w-6xl">
+          <SectionHeader 
+            title={isBangla ? "বাংলাদেশ" : "Bangladesh"} 
+            subtitle={isBangla ? "জাতীয় রাজনীতি, অর্থনীতি ও সমাজের সর্বশেষ খবর" : "Latest news on national politics, economy and society"}
+            linkText={isBangla ? "সব খবর পড়ুন" : "Read all news"}
+            linkHref="/category/bangladesh"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 font-sans">
+            {bangladeshNews.map(article => (
+              <div key={article.id} className="flex flex-col group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <div className="relative w-full aspect-[4/3] overflow-hidden">
+                  <img 
+                    src={article.image} 
+                    alt={article.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 left-3 bg-brand-red text-white text-[10px] font-bold px-2 py-1 tracking-wider rounded-sm shadow-md">
+                    {article.category}
+                  </div>
+                </div>
+                <div className="p-5 flex-1 flex flex-col">
+                  <a href={`/news/${article.slug}`}>
+                    <h3 className="font-serif font-bold text-xl leading-snug group-hover:text-brand-red transition-colors mb-3">
+                      {article.title}
+                    </h3>
+                  </a>
+                  <p className="text-gray-600 text-sm line-clamp-3 mb-4 leading-relaxed">
+                    {article.excerpt}
+                  </p>
+                  <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 font-medium">
+                    <span>{article.author.name}</span>
+                    <span>{article.readTime}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -90,14 +151,13 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {investigations.map(article => (
               <div key={article.id} className="group flex flex-col gap-4">
-                <div className="relative w-full aspect-[16/9] overflow-hidden">
-                  <Image 
+                <div className="relative w-full aspect-[16/9] overflow-hidden rounded-xl">
+                  <img 
                     src={article.image} 
                     alt={article.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
                   />
-                  <div className="absolute top-4 left-4 bg-brand-red text-white text-[10px] font-bold uppercase px-3 py-1.5 tracking-widest flex items-center gap-2">
+                  <div className="absolute top-4 left-4 bg-brand-red text-white text-[10px] font-bold uppercase px-3 py-1.5 tracking-widest flex items-center gap-2 rounded-sm shadow-lg">
                     <ShieldCheck size={14} />
                     Exclusive Report
                   </div>
@@ -116,7 +176,7 @@ export default function Home() {
                   </p>
                   <div className="flex items-center gap-3 text-sm text-gray-300 font-medium border-t border-white/20 pt-4 mt-auto">
                     <div className="w-8 h-8 rounded-full overflow-hidden relative">
-                      <Image src={article.author.avatar} alt={article.author.name} fill className="object-cover" />
+                      <img src={article.author.avatar} alt={article.author.name} className="w-full h-full object-cover" />
                     </div>
                     <span>{article.author.name}</span>
                   </div>
@@ -133,19 +193,18 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <div className="lg:col-span-8">
               <SectionHeader 
-                title="Fact Check Center" 
-                linkText="More Fact Checks"
+                title={isBangla ? "ফ্যাক্ট চেক" : "Fact Check Center"} 
+                linkText={isBangla ? "সব ফ্যাক্ট চেক" : "More Fact Checks"}
                 linkHref="/fact-check"
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {factChecks.map((article, i) => (
-                  <Link key={article.id} href={`/news/${article.slug}`} className="group flex flex-col bg-brand-gray-light border border-gray-200 hover:border-brand-navy transition-colors">
+                  <Link key={article.id} href={`/news/${article.slug}`} className="group flex flex-col bg-brand-gray-light border border-gray-200 hover:border-brand-navy hover:shadow-lg transition-all rounded-xl overflow-hidden">
                     <div className="relative h-48 w-full overflow-hidden">
-                      <Image 
+                      <img 
                         src={article.image} 
                         alt={article.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       {article.factCheckStatus && (
                         <div className={`absolute bottom-0 left-0 text-white text-xs font-bold uppercase px-3 py-1.5 tracking-wider
@@ -158,7 +217,7 @@ export default function Home() {
                         </div>
                       )}
                     </div>
-                    <div className="p-5 flex-1 flex flex-col">
+                    <div className="p-5 flex-1 flex flex-col bg-white">
                       <h3 className="font-serif font-bold text-lg leading-tight group-hover:text-brand-red transition-colors mb-3">
                         {article.title}
                       </h3>
@@ -173,7 +232,7 @@ export default function Home() {
 
             <div className="lg:col-span-4 flex flex-col gap-12">
               <div>
-                <SectionHeader title="Trending Topics" />
+                <SectionHeader title={isBangla ? "ট্রেন্ডিং টপিক" : "Trending Topics"} />
                 <div className="flex flex-wrap gap-2">
                   {trendingTopics.map(topic => (
                     <Link 
@@ -188,12 +247,12 @@ export default function Home() {
               </div>
 
               <div>
-                <SectionHeader title="Journalist Spotlight" />
+                <SectionHeader title={isBangla ? "সাংবাদিক পরিচিতি" : "Journalist Spotlight"} />
                 <div className="flex flex-col gap-4">
                   {authors.slice(0, 3).map(author => (
-                    <div key={author.id} className="flex items-center gap-4 group cursor-pointer">
+                    <div key={author.id} className="flex items-center gap-4 group cursor-pointer bg-white p-4 border border-gray-100 hover:border-brand-red hover:shadow-md transition-all rounded-lg">
                       <div className="w-16 h-16 rounded-full overflow-hidden relative shrink-0 grayscale group-hover:grayscale-0 transition-all border-2 border-transparent group-hover:border-brand-red">
-                        <Image src={author.avatar} alt={author.name} fill className="object-cover" />
+                        <img src={author.avatar} alt={author.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <h4 className="font-bold text-brand-navy group-hover:text-brand-red transition-colors">{author.name}</h4>
@@ -221,16 +280,15 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {videos.length > 0 ? videos.map((article, i) => (
               <div key={article.id} className={`group ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}>
-                <Link href={`/news/${article.slug}`} className="block relative w-full aspect-video overflow-hidden">
-                  <Image 
+                <Link href={`/news/${article.slug}`} className="block relative w-full aspect-video overflow-hidden rounded-xl border border-white/10 group-hover:border-brand-red transition-all shadow-2xl">
+                  <img 
                     src={article.image} 
                     alt={article.title}
-                    fill
-                    className="object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500"
+                    className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500"
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-black/50 flex items-center justify-center border border-white/30 group-hover:bg-brand-red group-hover:border-brand-red transition-colors">
-                      <PlayCircle size={32} className="text-white" />
+                    <div className="w-16 h-16 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:bg-brand-red group-hover:border-brand-red transition-colors shadow-xl">
+                      <PlayCircle size={32} className="text-white ml-1" />
                     </div>
                   </div>
                   <div className="absolute bottom-0 left-0 p-4 md:p-6 w-full bg-gradient-to-t from-black/90 to-transparent">
@@ -258,16 +316,16 @@ export default function Home() {
             linkText="Read All Columns"
             linkHref="/opinion"
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 border-t border-b border-gray-200 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 py-8">
             {opinions.map((article) => (
-              <div key={article.id} className="flex flex-col group border-r border-gray-200 last:border-r-0 pr-8 last:pr-0">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full overflow-hidden relative shrink-0">
-                    <Image src={article.author.avatar} alt={article.author.name} fill className="object-cover" />
+              <div key={article.id} className="flex flex-col group bg-brand-gray-light p-6 rounded-xl border border-gray-100 hover:border-brand-navy hover:shadow-md transition-all">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                  <div className="w-12 h-12 rounded-full overflow-hidden relative shrink-0">
+                    <img src={article.author.avatar} alt={article.author.name} className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <h4 className="font-bold text-sm text-brand-navy">{article.author.name}</h4>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">{article.author.role}</p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">{article.author.role}</p>
                   </div>
                 </div>
                 <Link href={`/news/${article.slug}`}>
@@ -275,7 +333,7 @@ export default function Home() {
                     "{article.title}"
                   </h3>
                 </Link>
-                <p className="text-gray-600 text-sm line-clamp-3 mb-4 italic">
+                <p className="text-gray-600 text-sm line-clamp-4 mb-4 italic leading-relaxed">
                   {article.excerpt}
                 </p>
               </div>

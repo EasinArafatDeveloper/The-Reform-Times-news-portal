@@ -1,13 +1,13 @@
 import { format } from 'date-fns';
-import { Search, Globe } from 'lucide-react';
 import { TwitterIcon, FacebookIcon, InstagramIcon, YoutubeIcon } from '@/components/ui/icons';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import Link from 'next/link';
 
 export function Header() {
   const currentDate = new Date();
 
   return (
-    <div className="bg-brand-navy text-white text-xs py-2 px-4">
+    <div className="relative z-[60] bg-brand-navy text-white text-xs py-2 px-4">
       <div className="container flex justify-between items-center">
         <div className="flex items-center gap-4">
           <span className="hidden md:inline-block border-r border-white/20 pr-4">
@@ -21,18 +21,15 @@ export function Header() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden lg:flex items-center gap-3 border-r border-white/20 pr-4">
-            <Link href="#" className="hover:text-brand-red transition-colors"><TwitterIcon width={14} height={14} /></Link>
-            <Link href="#" className="hover:text-brand-red transition-colors"><FacebookIcon width={14} height={14} /></Link>
-            <Link href="#" className="hover:text-brand-red transition-colors"><InstagramIcon width={14} height={14} /></Link>
-            <Link href="#" className="hover:text-brand-red transition-colors"><YoutubeIcon width={14} height={14} /></Link>
+          <div className="flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-3 border-r border-white/20 pr-4">
+              <Link href="#" className="hover:text-brand-red transition-colors"><TwitterIcon width={14} height={14} /></Link>
+              <Link href="#" className="hover:text-brand-red transition-colors"><FacebookIcon width={14} height={14} /></Link>
+              <Link href="#" className="hover:text-brand-red transition-colors"><InstagramIcon width={14} height={14} /></Link>
+              <Link href="#" className="hover:text-brand-red transition-colors"><YoutubeIcon width={14} height={14} /></Link>
+            </div>
+            <LanguageSwitcher />
           </div>
-          <div className="flex items-center gap-2 cursor-pointer hover:text-brand-red transition-colors">
-            <Globe size={14} />
-            <span className="hidden sm:inline">English</span>
-          </div>
-        </div>
       </div>
     </div>
   );

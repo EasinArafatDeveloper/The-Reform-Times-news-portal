@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { format } from "date-fns";
 import { Article } from "@/lib/data";
 import { CategoryBadge } from "@/components/ui/CategoryBadge";
@@ -16,12 +15,11 @@ export function NewsCard({ article, layout = "vertical", className, imageClassNa
   if (layout === "compact") {
     return (
       <div className={cn("group flex gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0", className)}>
-        <div className="relative w-24 h-24 shrink-0 overflow-hidden">
-          <Image 
+        <div className="relative w-24 h-24 shrink-0 overflow-hidden rounded-md shadow-sm">
+          <img 
             src={article.image} 
             alt={article.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         </div>
         <div className="flex-1">
@@ -42,12 +40,11 @@ export function NewsCard({ article, layout = "vertical", className, imageClassNa
   if (layout === "horizontal") {
     return (
       <div className={cn("group flex flex-col sm:flex-row gap-6", className)}>
-        <div className={cn("relative w-full sm:w-2/5 aspect-[4/3] sm:aspect-auto overflow-hidden", imageClassName)}>
-          <Image 
+        <div className={cn("relative w-full sm:w-2/5 aspect-[4/3] sm:aspect-auto overflow-hidden rounded-xl shadow-md", imageClassName)}>
+          <img 
             src={article.image} 
             alt={article.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         </div>
         <div className="flex-1 flex flex-col justify-center">
@@ -72,21 +69,20 @@ export function NewsCard({ article, layout = "vertical", className, imageClassNa
 
   // vertical
   return (
-    <div className={cn("group flex flex-col h-full", className)}>
+    <div className={cn("group flex flex-col h-full bg-white transition-all hover:-translate-y-1 hover:shadow-xl rounded-xl overflow-hidden border border-gray-100", className)}>
       <div className={cn("relative w-full aspect-[4/3] overflow-hidden mb-4", imageClassName)}>
-        <Image 
+        <img 
           src={article.image} 
           alt={article.title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         {article.breaking && (
-          <div className="absolute top-2 left-2 bg-brand-red text-white text-[10px] font-bold uppercase px-2 py-1 tracking-wider">
+          <div className="absolute top-3 left-3 bg-brand-red text-white text-[10px] font-bold uppercase px-2.5 py-1 tracking-wider shadow-md rounded-sm">
             Breaking
           </div>
         )}
       </div>
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col p-5 pt-0">
         <CategoryBadge category={article.category} />
         <Link href={`/news/${article.slug}`}>
           <h3 className="font-serif font-bold text-lg leading-tight group-hover:text-brand-red transition-colors mb-2">

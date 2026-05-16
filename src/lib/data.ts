@@ -26,13 +26,101 @@ export interface Article {
   readTime: string;
   image: string;
   tags: string[];
-  featured?: boolean;
-  breaking?: boolean;
-  type?: 'standard' | 'video' | 'investigation' | 'opinion' | 'fact-check';
+  type?: 'standard' | 'investigation' | 'opinion' | 'fact-check' | 'video';
   factCheckStatus?: 'Verified' | 'False' | 'Misleading' | 'Under Review';
+  breaking?: boolean;
+  featured?: boolean;
 }
 
+export const banglaArticles: Article[] = [
+  {
+    id: '1',
+    slug: 'uncovering-the-hidden-supply-chain-crisis',
+    title: 'ঢাকার যানজট নিরসনে নতুন মেগা প্ল্যান: কতটা কার্যকর হবে?',
+    excerpt: 'রাজধানীর দীর্ঘদিনের যানজট সমস্যা সমাধানে সরকার নতুন একটি মেগা প্ল্যান হাতে নিয়েছে। বিশেষজ্ঞরা মিশ্র প্রতিক্রিয়া জানিয়েছেন।',
+    content: '<p>রাজধানী ঢাকার যানজট নিরসনে সরকার নতুন একটি পরিকল্পনা গ্রহণ করেছে, যা আগামী দুই বছরের মধ্যে বাস্তবায়ন করা হবে বলে আশা করা হচ্ছে। এই পরিকল্পনায় আধুনিক সিগন্যাল সিস্টেম এবং নতুন কিছু ফ্লাইওভারের প্রস্তাব রয়েছে।</p><p>তবে নগর পরিকল্পনাবিদরা বলছেন, শুধুমাত্র অবকাঠামো উন্নয়ন দিয়ে এই সমস্যার স্থায়ী সমাধান সম্ভব নয়। গণপরিবহনের আধুনিকায়ন ও বিকেন্দ্রীকরণ জরুরি।</p>',
+    category: 'Investigations',
+    author: {
+      id: 'a1',
+      name: 'Sarah Jenkins',
+      role: 'Senior Investigative Reporter',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
+      bio: 'Award-winning journalist focusing on corporate corruption and public policy.',
+      articleCount: 142
+    },
+    date: new Date().toISOString(),
+    readTime: '৩ মিনিট পড়ুন',
+    image: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f0a?auto=format&fit=crop&q=80&w=1200',
+    tags: ['ঢাকা', 'যানজট', 'উন্নয়ন'],
+    type: 'standard',
+  },
+  {
+    id: '2',
+    slug: 'the-future-of-renewable-energy-in-developing-nations',
+    title: 'জলবায়ু পরিবর্তনের প্রভাবে হুমকির মুখে উপকূলীয় অঞ্চল',
+    excerpt: 'সমুদ্রপৃষ্ঠের উচ্চতা বৃদ্ধি এবং ঘন ঘন প্রাকৃতিক দুর্যোগের কারণে বাংলাদেশের দক্ষিণাঞ্চলের লক্ষাধিক মানুষ বাস্তুচ্যুত হওয়ার ঝুঁকিতে রয়েছে।',
+    content: '<p>সাম্প্রতিক এক গবেষণায় দেখা গেছে, জলবায়ু পরিবর্তনের ফলে বাংলাদেশের উপকূলীয় অঞ্চলে লবণাক্ততা বৃদ্ধি পেয়েছে, যা কৃষিকাজের জন্য বড় হুমকি।</p>',
+    category: 'Environment',
+    author: {
+      id: 'a2',
+      name: 'Michael Chen',
+      role: 'Data Journalism Editor',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150',
+      bio: 'Data specialist visualizing complex systemic issues and economic trends.',
+      articleCount: 89
+    },
+    date: new Date().toISOString(),
+    readTime: '৪ মিনিট পড়ুন',
+    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=1200',
+    tags: ['জলবায়ু', 'পরিবেশ', 'উপকূল'],
+    type: 'standard',
+  },
+  {
+    id: '3',
+    slug: 'new-education-reforms-spark-nationwide-debate',
+    title: 'শিক্ষা খাতে ব্যাপক সংস্কারের দাবি বিশেষজ্ঞদের',
+    excerpt: 'মুখস্থবিদ্যা নির্ভর শিক্ষাব্যবস্থা থেকে বেরিয়ে এসে কর্মমুখী ও সৃজনশীল শিক্ষার উপর জোর দেওয়ার আহ্বান জানিয়েছেন শিক্ষাবিদরা।',
+    content: '<p>বর্তমান শিক্ষাব্যবস্থা শিক্ষার্থীদের প্রতিযোগিতামূলক বিশ্বের জন্য কতটা প্রস্তুত করছে তা নিয়ে প্রশ্ন তুলেছেন বিশ্লেষকরা।</p>',
+    category: 'National',
+    author: {
+      id: 'a3',
+      name: 'Elena Rodriguez',
+      role: 'Human Rights Correspondent',
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150',
+      bio: 'Reporting from the frontlines of global human rights movements.',
+      articleCount: 215
+    },
+    date: new Date().toISOString(),
+    readTime: '২ মিনিট পড়ুন',
+    image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=1200',
+    tags: ['শিক্ষা', 'সংস্কার', 'বাংলাদেশ'],
+    type: 'standard',
+  },
+  {
+    id: '4',
+    slug: 'tech-startups-thriving-despite-economic-headwinds',
+    title: 'ঢাকায় প্রযুক্তি স্টার্টআপের নতুন দিগন্ত',
+    excerpt: 'তরুণ উদ্যোক্তাদের হাত ধরে প্রযুক্তি খাতে দ্রুত এগিয়ে যাচ্ছে বাংলাদেশ। বিদেশি বিনিয়োগও বাড়ছে উল্লেখযোগ্য হারে।',
+    content: '<p>গত কয়েক বছরে দেশের স্টার্টআপ ইকোসিস্টেমে ব্যাপক পরিবর্তন এসেছে। ফিনটেক, এডটেক এবং হেলথটেক খাতে নতুন নতুন আইডিয়া নিয়ে কাজ করছে তরুণরা।</p>',
+    category: 'Technology',
+    author: {
+      id: 'a1',
+      name: 'Sarah Jenkins',
+      role: 'Senior Reporter',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
+      bio: 'Award-winning journalist.',
+      articleCount: 142
+    },
+    date: new Date().toISOString(),
+    readTime: '৩ মিনিট পড়ুন',
+    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1200',
+    tags: ['প্রযুক্তি', 'স্টার্টআপ', 'বিনিয়োগ'],
+    type: 'standard',
+  }
+];
+
 export const categories: Category[] = [
+  { id: '0', name: 'Bangladesh', slug: 'bangladesh' },
   { id: '1', name: 'National', slug: 'national' },
   { id: '2', name: 'World', slug: 'world' },
   { id: '3', name: 'Politics', slug: 'politics' },
@@ -202,14 +290,72 @@ export const trendingTopics = [
 ];
 
 export const navigationLinks = [
-  { name: 'Home', href: '/' },
-  { name: 'National', href: '/category/national' },
-  { name: 'World', href: '/category/world' },
-  { name: 'Politics', href: '/category/politics' },
-  { name: 'Human Rights', href: '/category/human-rights' },
-  { name: 'Investigations', href: '/investigations' },
-  { name: 'Opinion', href: '/opinion' },
-  { name: 'Fact Check', href: '/fact-check' },
-  { name: 'Video', href: '/video' },
-  { name: 'Contact', href: '/contact' },
+  { name: 'Home', bnName: 'প্রচ্ছদ', href: '/' },
+  { name: 'Bangladesh', bnName: 'বাংলাদেশ', href: '/category/bangladesh' },
+  { name: 'International', bnName: 'আন্তর্জাতিক', href: '/category/world' },
+  { name: 'Politics', bnName: 'রাজনীতি', href: '/category/politics' },
+  { name: 'Investigations', bnName: 'অনুসন্ধান', href: '/investigations' },
+  { name: 'Fact Check', bnName: 'ফ্যাক্ট চেক', href: '/fact-check' },
 ];
+
+export const uiTranslations = {
+  en: {
+    subscribe: "Subscribe",
+    searchPlaceholder: "Search news...",
+    breaking: "Breaking",
+    more: "More",
+    sections: "Sections",
+    organization: "Organization",
+    newsletter: "Newsletter",
+    newsletterDesc: "Get truth delivered weekly. Sign up for our top investigative stories.",
+    allRightsReserved: "All rights reserved.",
+    aboutUs: "About Us",
+    contactTips: "Contact & Tips",
+    editorialPolicy: "Editorial Policy",
+    careers: "Careers",
+    transparency: "Transparency Report",
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
+    cookieSettings: "Cookie Settings",
+    heroTitle: "Journalism that Matters",
+    heroSubtitle: "Dedicated to human rights, truth, and transparency.",
+    readMore: "Read More",
+  },
+  bn: {
+    subscribe: "সাবস্ক্রাইব",
+    searchPlaceholder: "খবর খুঁজুন...",
+    breaking: "ব্রেকিং",
+    more: "আরও",
+    sections: "বিভাগ",
+    organization: "প্রতিষ্ঠান",
+    newsletter: "নিউজলেটার",
+    newsletterDesc: "সাপ্তাহিক সত্য সংবাদ পান। আমাদের সেরা অনুসন্ধানী গল্পের জন্য সাইন আপ করুন।",
+    allRightsReserved: "সর্বস্বত্ব সংরক্ষিত।",
+    aboutUs: "আমাদের সম্পর্কে",
+    contactTips: "যোগাযোগ ও টিপস",
+    editorialPolicy: "সম্পাদকীয় নীতি",
+    careers: "ক্যারিয়ার",
+    transparency: "স্বচ্ছতা রিপোর্ট",
+    privacyPolicy: "গোপনীয়তা নীতি",
+    termsOfService: "পরিষেবার শর্তাবলী",
+    cookieSettings: "কুকি সেটিংস",
+    heroTitle: "সঠিক সংবাদ, সঠিক দিশা",
+    heroSubtitle: "মানবাধিকার, সত্য এবং স্বচ্ছতার প্রতি নিবেদিত।",
+    readMore: "আরও পড়ুন",
+  }
+};
+export const categoryTranslations: Record<string, string> = {
+  'Investigations': 'অনুসন্ধান',
+  'Environment': 'পরিবেশ',
+  'National': 'জাতীয়',
+  'Technology': 'প্রযুক্তি',
+  'Politics': 'রাজনীতি',
+  'World': 'আন্তর্জাতিক',
+  'International': 'আন্তর্জাতিক',
+  'Human Rights': 'মানবাধিকার',
+  'Advocacy': 'অধিকার',
+  'Fact Check': 'ফ্যাক্ট চেক',
+  'Opinion': 'মতামত',
+  'Video': 'ভিডিও',
+  'Bangladesh': 'বাংলাদেশ',
+};
