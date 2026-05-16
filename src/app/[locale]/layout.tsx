@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Merriweather, Inter, Noto_Serif_Bengali, Hind_Siliguri } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/Header";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 
 const merriweather = Merriweather({ subsets: ['latin'], weight: ['300', '400', '700', '900'], variable: '--font-serif' });
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -15,20 +12,33 @@ export const metadata: Metadata = {
   description: "Investigative journalism, human rights storytelling, and reform-focused reporting.",
 };
 
-export default function RootLayout({
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+
+export default async function RootLayout({
   children,
-}: Readonly<{
+  params,
+}: {
   children: React.ReactNode;
-}>) {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+
   return (
-    <html lang="en">
-      <body className={`${merriweather.variable} ${inter.variable} ${notoSerifBengali.variable} ${hindSiliguri.variable} font-sans antialiased flex flex-col min-h-screen`}>
-        <Header />
-        <Navbar />
-        <main className="flex-grow">
+    <html lang={locale} suppressHydrationWarning>
+      <body 
+        className={`${merriweather.variable} ${inter.variable} ${notoSerifBengali.variable} ${hindSiliguri.variable} ${
+          locale === 'bn' ? 'font-bengali-sans' : 'font-sans'
+        } antialiased flex flex-col min-h-screen bg-background text-body`}
+        suppressHydrationWarning
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           {children}
-        </main>
-        <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );
