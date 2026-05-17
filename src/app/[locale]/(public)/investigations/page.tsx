@@ -23,8 +23,8 @@ export default async function InvestigationsPage({
   const rawArticles = await db.collection('articles')
     .find({ 
       $or: [
-        { type: 'investigation' },
-        { category: 'investigations' }
+        { type: { $in: ['Investigation', 'investigation'] } },
+        { category: { $in: ['Investigations', 'investigations'] } }
       ],
       status: 'Published' 
     })

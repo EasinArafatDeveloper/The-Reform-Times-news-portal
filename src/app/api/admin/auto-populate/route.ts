@@ -12,17 +12,31 @@ export async function GET() {
     if (journalistCount === 0) {
       authors = [
         { 
-          name: 'Salman Ahmed', 
+          name: 'Kazi Salman', 
           role: { en: 'Chief Editor', bn: 'প্রধান সম্পাদক' }, 
           bio: { en: 'Dedicated to truth and systemic transparency.', bn: 'সত্য এবং কাঠামোগত স্বচ্ছতার প্রতি নিবেদিত।' },
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150', 
+          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', 
           status: 'Active' 
         },
         { 
-          name: 'Sarah Jenkins', 
-          role: { en: 'Senior Reporter', bn: 'সিনিয়র রিপোর্টার' }, 
-          bio: { en: 'Expert in investigative journalism and public policy.', bn: 'অনুসন্ধানী সাংবাদিকতা এবং জননীতি বিশেষজ্ঞ।' },
+          name: 'Tasmia Rahman', 
+          role: { en: 'Senior Investigative Journalist', bn: 'সিনিয়র অনুসন্ধানী সাংবাদিক' }, 
+          bio: { en: 'Specializes in exposing corruption, public policy malpractices, and corporate accountability.', bn: 'দুর্নীতি উন্মোচন, সরকারি নীতিমালার অপপ্রয়োগ এবং করপোরেট জবাবদিহিতা সংক্রান্ত সংবাদে দক্ষ।' },
           avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', 
+          status: 'Active' 
+        },
+        { 
+          name: 'Abrar Chowdhury', 
+          role: { en: 'Lead Fact-Checker', bn: 'প্রধান তথ্য-যাচাইকারী' }, 
+          bio: { en: 'Combats digital misinformation and propaganda through rigorous verification.', bn: 'কঠোর তথ্য-যাচাইয়ের মাধ্যমে ডিজিটাল অপপ্রচার এবং প্রোপাগান্ডা প্রতিরোধ করেন।' },
+          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', 
+          status: 'Active' 
+        },
+        { 
+          name: 'Nabila Hasan', 
+          role: { en: 'Human Rights Correspondent', bn: 'মানবাধিকার প্রতিনিধি' }, 
+          bio: { en: 'Covers humanitarian crises, minority rights, and grassroots social movements.', bn: 'মানবিক সংকট, সংখ্যালঘু অধিকার এবং তৃণমূল পর্যায়ের আন্দোলন নিয়ে কাজ করেন।' },
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', 
           status: 'Active' 
         }
       ];

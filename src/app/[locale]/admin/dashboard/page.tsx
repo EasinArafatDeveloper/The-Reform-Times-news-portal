@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   FileText, 
   Users, 
@@ -19,35 +20,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Mock Data for Dashboard
-const stats = [
-  { label: 'Total Articles', value: '1,284', icon: FileText, change: '+12%', trend: 'up' },
-  { label: 'Total Visitors', value: '45.2K', icon: Eye, change: '+24%', trend: 'up' },
-  { label: 'Newsletter Subscriptions', value: '8,420', icon: Mail, change: '+5%', trend: 'up' },
-  { label: 'Story Submissions', value: '24', icon: Search, change: '-2%', trend: 'down' },
-];
-
-const articleStats = [
-  { label: 'Published', value: '842', color: 'text-green-600', bg: 'bg-green-50' },
-  { label: 'Drafts', value: '124', color: 'text-gray-600', bg: 'bg-gray-100' },
-  { label: 'Pending Review', value: '18', color: 'text-amber-600', bg: 'bg-amber-50' },
-  { label: 'Investigations', value: '12', color: 'text-brand-red', bg: 'bg-red-50' },
-];
-
-const recentActivity = [
-  { id: 1, user: 'Salman Ahmed', action: 'published', target: 'The Reform Movement in 2024', time: '2 mins ago' },
-  { id: 2, user: 'Sarah Jenkins', action: 'submitted', target: 'Uncovering Supply Chain Crisis', time: '15 mins ago' },
-  { id: 3, user: 'Elena Rodriguez', action: 'edited', target: 'Education Policy Update', time: '1 hour ago' },
-  { id: 4, user: 'System', action: 'received', target: 'New Anonymous Tip #842', time: '2 hours ago' },
-  { id: 5, user: 'Marcus Thorne', action: 'fact-checked', target: 'Political Claim #12', time: '3 hours ago' },
-];
-
-const topArticles = [
-  { id: 1, title: 'The Hidden Cost of Reform', views: '12.4K', category: 'Investigations', trend: '+15%' },
-  { id: 2, title: 'Why Policy Matters for Youth', views: '8.2K', category: 'Advocacy', trend: '+8%' },
-  { id: 3, title: 'Election 2024: What to Expect', views: '7.1K', category: 'Politics', trend: '+22%' },
-  { id: 4, title: 'Climate Crisis in Coastal Cities', views: '6.5K', category: 'Environment', trend: '-3%' },
-];
+// Real-time Dashboard with MongoDB Dynamic Data
 
 export default function Dashboard() {
   const [data, setData] = useState<any>(null);
@@ -86,7 +59,7 @@ export default function Dashboard() {
     <div className="space-y-10">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-serif font-bold text-title">Welcome back, Salman</h1>
+        <h1 className="text-3xl font-serif font-bold text-title">Welcome back, Kazi</h1>
         <p className="text-caption mt-1">Here is what is happening with The Reform Times today.</p>
       </div>
 
@@ -165,24 +138,37 @@ export default function Dashboard() {
         <div className="bg-secondary text-white rounded-2xl shadow-xl p-8">
           <h2 className="text-xl font-serif font-bold mb-8">Top Performing</h2>
           <div className="space-y-8">
-            {topArticles.map((article) => (
-              <div key={article.id} className="group cursor-pointer">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">{article.category}</span>
-                  <span className={cn(
-                    "text-xs font-bold",
-                    article.trend.startsWith('+') ? "text-green-400" : "text-red-400"
-                  )}>{article.trend}</span>
-                </div>
-                <h3 className="font-serif font-bold text-base group-hover:text-primary transition-colors mb-2 line-clamp-2">
-                  {article.title}
-                </h3>
-                <div className="flex items-center gap-2 text-white/50 text-xs">
-                  <Eye size={14} />
-                  <span>{article.views} views</span>
-                </div>
+            {loading ? (
+              <div className="space-y-6">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="space-y-2 animate-pulse">
+                    <div className="h-3 w-16 bg-white/10 rounded"></div>
+                    <div className="h-5 w-full bg-white/10 rounded"></div>
+                    <div className="h-3 w-20 bg-white/10 rounded"></div>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (data?.topArticles || []).length > 0 ? (
+              (data.topArticles).map((article: any) => (
+                <div key={article.id} className="group cursor-pointer">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">{article.category}</span>
+                    <span className={cn(
+                      "text-xs font-bold text-green-400"
+                    )}>{article.trend}</span>
+                  </div>
+                  <h3 className="font-serif font-bold text-base group-hover:text-primary transition-colors mb-2 line-clamp-2">
+                    {article.title}
+                  </h3>
+                  <div className="flex items-center gap-2 text-white/50 text-xs">
+                    <Eye size={14} />
+                    <span>{article.views} views</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-white/40 text-xs py-4 text-center">No published articles yet.</p>
+            )}
           </div>
           <button className="w-full mt-10 py-4 border border-white/20 rounded-xl text-sm font-bold hover:bg-white/5 transition-colors">
             View Analytics Report
@@ -192,24 +178,50 @@ export default function Dashboard() {
 
       {/* Quick Actions & Pending Items */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-         <div className="bg-card rounded-2xl border border-border shadow-sm p-8">
-            <h2 className="text-xl font-serif font-bold text-title mb-6">Pending Moderation</h2>
+          <div className="bg-card rounded-2xl border border-border shadow-sm p-8">
+            <h2 className="text-xl font-serif font-bold text-title mb-6 flex items-center justify-between">
+              <span>Pending Moderation</span>
+              {!loading && (data?.pendingArticles || []).length > 0 && (
+                <span className="text-xs bg-amber-50 text-amber-600 font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                  {data.pendingArticles.length} new
+                </span>
+              )}
+            </h2>
             <div className="space-y-4">
-               {[1, 2, 3].map((i) => (
-                 <div key={i} className="flex items-start gap-4 p-4 bg-surface rounded-xl border border-border">
-                    <MessageSquare size={18} className="text-caption mt-1" />
-                    <div className="flex-1">
-                       <p className="text-sm font-bold text-title mb-1 italic">"This investigation is crucial for our community..."</p>
-                       <p className="text-xs text-caption">on <span className="font-semibold">The Future of Reform</span> • 12m ago</p>
+              {loading ? (
+                <div className="space-y-3">
+                  {[1, 2].map(i => (
+                    <div key={i} className="h-20 bg-surface animate-pulse rounded-xl border border-border"></div>
+                  ))}
+                </div>
+              ) : (data?.pendingArticles || []).length > 0 ? (
+                (data.pendingArticles).map((article: any) => (
+                  <div key={article.id} className="flex items-start gap-4 p-4 bg-surface rounded-xl border border-border group hover:border-amber-300 transition-all">
+                    <MessageSquare size={18} className="text-amber-500 mt-1 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-title mb-1 line-clamp-1 group-hover:text-primary transition-colors">{article.title}</p>
+                      <p className="text-xs text-caption">by <span className="font-semibold text-title">{article.author}</span> • {article.time}</p>
                     </div>
-                    <div className="flex gap-2">
-                       <button className="p-2 bg-card text-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-all shadow-sm border border-border"><CheckCircle2 size={16} /></button>
-                       <button className="p-2 bg-card text-primary rounded-lg hover:bg-primary hover:text-white transition-all shadow-sm border border-border"><X size={16} /></button>
+                    <div className="flex gap-2 shrink-0">
+                      <Link 
+                        href={`/admin/articles/edit/${article.id}`}
+                        className="p-2 bg-card hover:bg-primary hover:text-white text-caption rounded-lg transition-all shadow-sm border border-border flex items-center justify-center"
+                        title="Review and Publish"
+                      >
+                        <CheckCircle2 size={16} />
+                      </Link>
                     </div>
-                 </div>
-               ))}
+                  </div>
+                ))
+              ) : (
+                <div className="p-6 text-center bg-green-50/50 border border-green-100 rounded-xl">
+                  <CheckCircle2 className="text-green-500 w-8 h-8 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-green-700">All caught up!</p>
+                  <p className="text-[10px] text-green-600 mt-0.5">No articles are pending review right now.</p>
+                </div>
+              )}
             </div>
-         </div>
+          </div>
 
          <div className="bg-card rounded-2xl border border-border shadow-sm p-8">
             <h2 className="text-xl font-serif font-bold text-title mb-6">Anonymous Tips</h2>

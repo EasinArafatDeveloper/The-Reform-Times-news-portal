@@ -20,6 +20,8 @@ import {
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 const statusStyles: Record<string, string> = {
   'Published': 'bg-green-500/10 text-green-500 border-green-500/20',
@@ -43,14 +45,6 @@ export default function BreakingNewsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All');
-  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-
-  useEffect(() => {
-    if (alert) {
-      const timer = setTimeout(() => setAlert(null), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [alert]);
 
   useEffect(() => {
     fetchArticles();
@@ -95,19 +89,28 @@ export default function BreakingNewsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm(isBangla ? 'আপনি কি নিশ্চিত যে এই ব্রেকিং নিউজটি ডিলিট করতে চান?' : 'Are you sure you want to delete this breaking dispatch?')) return;
+    const result = await Swal.fire({
+      title: isBangla ? 'আপনি কি নিশ্চিত?' : 'Are you sure?',
+      text: isBangla ? 'এই ব্রেকিং নিউজটি ডিলিট করতে চান?' : 'Do you want to delete this breaking dispatch?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: isBangla ? 'হ্যাঁ, ডিলিট করুন' : 'Yes, delete it'
+    });
+    
+    if (!result.isConfirmed) return;
     
     try {
       const res = await fetch(`/api/articles/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setArticles(articles.filter(a => (a._id || a.id) !== id));
-        setAlert({ 
-          type: 'success', 
-          message: isBangla ? 'ব্রেকিং নিউজটি সফলভাবে ডিলিট করা হয়েছে!' : 'Breaking news deleted successfully!' 
-        });
+        toast.success(isBangla ? 'ব্রেকিং নিউজটি সফলভাবে ডিলিট করা হয়েছে!' : 'Breaking news deleted successfully!');
+      } else {
+        toast.error('Action failed');
       }
     } catch (err) {
-      setAlert({ type: 'error', message: 'Action failed' });
+      toast.error('Action failed');
     }
   };
 
@@ -120,31 +123,17 @@ export default function BreakingNewsPage() {
       });
       if (res.ok) {
         setArticles(articles.map(a => (a._id || a.id) === id ? { ...a, status: newStatus } : a));
-        setAlert({ 
-          type: 'success', 
-          message: isBangla ? 'স্ট্যাটাস সফলভাবে আপডেট করা হয়েছে!' : 'Status updated successfully!' 
-        });
+        toast.success(isBangla ? 'স্ট্যাটাস সফলভাবে আপডেট করা হয়েছে!' : 'Status updated successfully!');
+      } else {
+        toast.error('Action failed');
       }
     } catch (err) {
-      setAlert({ type: 'error', message: 'Action failed' });
+      toast.error('Action failed');
     }
   };
 
   return (
     <div className="space-y-10 text-body relative">
-      {alert && (
-        <div className={cn(
-          "fixed top-6 right-6 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl border shadow-2xl animate-in slide-in-from-top-4 duration-300 backdrop-blur-md",
-          alert.type === 'success' 
-            ? "bg-green-500/10 text-green-500 border-green-500/20" 
-            : "bg-red-500/10 text-red-500 border-red-500/20"
-        )}>
-          {alert.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-          <span className="font-bold text-sm">{alert.message}</span>
-        </div>
-      )}
-
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-widest mb-1.5 animate-pulse">

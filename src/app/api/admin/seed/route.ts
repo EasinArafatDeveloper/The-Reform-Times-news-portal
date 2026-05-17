@@ -13,8 +13,8 @@ export async function GET() {
 
     // 2. Seeding Data
     const journalists = [
-      { name: 'Salman Ahmed', role: 'Chief Editor', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150', articles: 156, status: 'Active' },
-      { name: 'Sarah Jenkins', role: 'Investigative Head', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', articles: 89, status: 'Active' }
+      { name: 'Kazi Salman', role: 'Chief Editor', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150', articles: 156, status: 'Active' },
+      { name: 'Kazi Salman', role: 'Investigative Head', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', articles: 89, status: 'Active' }
     ];
     await db.collection('journalists').insertMany(journalists);
 

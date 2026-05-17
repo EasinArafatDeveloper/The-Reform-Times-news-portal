@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 const AVATAR_PRESETS = [
   'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
@@ -101,7 +103,7 @@ export default function JournalistsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.role.bn || !formData.role.en || !formData.email) {
-      return alert('Name, Bangla Role, English Role, and Email are required.');
+      return toast.error('Name, Bangla Role, English Role, and Email are required.');
     }
 
     setIsSubmitting(true);
@@ -117,24 +119,41 @@ export default function JournalistsPage() {
       if (res.ok) {
         setShowModal(false);
         fetchJournalists();
+        toast.success(editingJournalist ? 'Journalist updated!' : 'Journalist added!');
       } else {
-        alert('Action failed.');
+        toast.error('Action failed.');
       }
     } catch (err) {
       console.error(err);
-      alert('Action failed.');
+      toast.error('Action failed.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this journalist?')) return;
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to delete this journalist?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Yes, delete it'
+    });
+    
+    if (!result.isConfirmed) return;
+    
     try {
       const res = await fetch(`/api/journalists?id=${id}`, { method: 'DELETE' });
-      if (res.ok) fetchJournalists();
+      if (res.ok) {
+        fetchJournalists();
+        toast.success('Journalist deleted successfully!');
+      } else {
+        toast.error('Delete failed.');
+      }
     } catch (err) {
-      alert('Delete failed.');
+      toast.error('Delete failed.');
     }
   };
 
@@ -257,6 +276,14 @@ export default function JournalistsPage() {
                  <div className="flex items-center justify-between pt-4 border-t border-border">
                     <a href={`mailto:${journalist.email}`} className="text-xs text-caption hover:text-primary flex items-center gap-1.5">
                       <Mail size={14} /> {journalist.email}
+                    </a>
+                    <a
+                      href={`/${locale}/journalist/${journalist._id || journalist.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-bold uppercase tracking-widest text-primary hover:underline flex items-center gap-1"
+                    >
+                      <ExternalLink size={11} /> Profile
                     </a>
                  </div>
               </div>

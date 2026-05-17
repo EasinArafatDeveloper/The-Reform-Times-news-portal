@@ -59,6 +59,7 @@ const adminNavLinks = [
     { name: 'Analytics', icon: BarChart3, href: '/admin/analytics' },
   ]},
   { group: "System", links: [
+    { name: 'Notifications', icon: Bell, href: '/admin/notifications' },
     { name: 'Roles & Permissions', icon: UserPlus, href: '/admin/roles' },
     { name: 'Settings', icon: Settings, href: '/admin/settings' },
   ]}
@@ -66,6 +67,7 @@ const adminNavLinks = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [ownerProfile, setOwnerProfile] = useState<{ name: string; avatar: string; role?: any } | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -80,6 +82,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [pathname]);
+
+  useEffect(() => {
+    fetch('/api/admin/settings')
+      .then(r => r.json())
+      .then(data => setOwnerProfile({ name: data.name || 'Admin', avatar: data.avatar || '', role: data.role }))
+      .catch(() => setOwnerProfile({ name: 'Admin', avatar: '' }));
+  }, []);
 
   const segments = pathname.split('/');
   const locale = i18n.locales.includes(segments[1] as any) ? segments[1] : i18n.defaultLocale;
@@ -191,12 +200,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="w-px h-6 bg-border mx-2"></div>
             <div className="flex items-center gap-3 pl-2">
               <div className="flex flex-col items-end hidden md:block">
-                <span className="text-sm font-bold text-title leading-none">Salman Ahmed</span>
+                <span className="text-sm font-bold text-title leading-none">{ownerProfile?.name || 'Admin'}</span>
                 <span className="text-[10px] text-caption font-bold uppercase tracking-wider">Super Admin</span>
               </div>
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold border-2 border-background shadow-sm cursor-pointer overflow-hidden">
-                 <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150" alt="admin" className="w-full h-full object-cover" />
-              </div>
+              <Link href={`/${locale}/admin/settings`} className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold border-2 border-background shadow-sm cursor-pointer overflow-hidden hover:ring-2 hover:ring-primary/40 transition-all">
+                 {ownerProfile?.avatar
+                   ? <img src={ownerProfile.avatar} alt={ownerProfile.name} className="w-full h-full object-cover" />
+                   : <span className="text-sm font-bold">{(ownerProfile?.name || 'A').charAt(0)}</span>
+                 }
+              </Link>
             </div>
           </div>
         </header>

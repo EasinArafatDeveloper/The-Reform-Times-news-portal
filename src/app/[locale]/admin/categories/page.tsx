@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 export default function CategoriesPage() {
   const params = useParams();
@@ -75,7 +77,7 @@ export default function CategoriesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.bn || !formData.name.en || !formData.slug) {
-      return alert('Bangla Name, English Name and Slug are required');
+      return toast.error('Bangla Name, English Name and Slug are required');
     }
     
     setIsSubmitting(true);
@@ -91,21 +93,40 @@ export default function CategoriesPage() {
       if (res.ok) {
         setShowModal(false);
         fetchCategories();
+        toast.success(editingCat ? 'Category updated!' : 'Category created!');
+      } else {
+        toast.error('Action failed');
       }
     } catch (err) {
-      alert('Action failed');
+      toast.error('Action failed');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this category?')) return;
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to delete this category?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Yes, delete it'
+    });
+    
+    if (!result.isConfirmed) return;
+    
     try {
       const res = await fetch(`/api/categories?id=${id}`, { method: 'DELETE' });
-      if (res.ok) fetchCategories();
+      if (res.ok) {
+        fetchCategories();
+        toast.success('Category deleted successfully!');
+      } else {
+        toast.error('Delete failed');
+      }
     } catch (err) {
-      alert('Delete failed');
+      toast.error('Delete failed');
     }
   };
 

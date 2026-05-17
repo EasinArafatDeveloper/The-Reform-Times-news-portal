@@ -23,8 +23,8 @@ export default async function OpinionPage({
   const rawArticles = await db.collection('articles')
     .find({ 
       $or: [
-        { type: 'opinion' },
-        { category: 'opinions' }
+        { type: { $in: ['Opinion', 'opinion'] } },
+        { category: { $in: ['Opinions', 'opinions', 'opinion'] } }
       ],
       status: 'Published' 
     })

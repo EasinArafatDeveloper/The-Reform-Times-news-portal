@@ -10,6 +10,7 @@ import { cn, serializeMongo } from "@/lib/utils";
 import { format } from "date-fns";
 import { bn as bnLocale } from "date-fns/locale";
 import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
+import SubscribeForm from "@/components/shared/SubscribeForm";
 
 export default async function Home({
   params,
@@ -34,12 +35,49 @@ export default async function Home({
         id: a._id ? a._id.toString() : a.id,
       })))
     : mockArticles;
+
+  // Fetch dynamic journalists from database with real story counts
+  const rawJournalists = await db.collection('journalists').find({}).toArray();
+  const dbJournalists = rawJournalists.length > 0 
+    ? serializeMongo(rawJournalists) 
+    : [];
+
+  const displayAuthors = dbJournalists.length > 0
+    ? await Promise.all(dbJournalists.map(async (j: any) => {
+        const count = await db.collection('articles').countDocuments({ 
+          $or: [
+            { 'author.name': j.name },
+            { 'authorId': j.id || j._id?.toString() }
+          ],
+          status: 'Published'
+        });
+        return {
+          id: j.id || j._id?.toString(),
+          name: j.name,
+          role: j.role,
+          bio: j.bio,
+          avatar: j.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+          articleCount: count || 0
+        };
+      }))
+    : authors;
   
   const latestNews = allArticles.slice(0, 8);
-  const investigations = allArticles.filter(a => a.type === 'investigation' || a.category === 'investigations').slice(0, 3);
-  const factChecks = allArticles.filter(a => a.category === 'fact-check' || a.type === 'fact-check').slice(0, 4);
-  const opinions = allArticles.filter(a => a.type === 'opinion' || a.category === 'opinions' || a.category === 'opinion').slice(0, 4);
-  const bangladeshNews = allArticles.filter(a => a.category === 'national' || a.category === 'politics' || a.category === 'bangladesh').slice(0, 6);
+  const investigations = allArticles.filter(a => 
+    ['investigation', 'Investigation'].includes(a.type) || 
+    ['investigations', 'Investigations'].includes(a.category)
+  ).slice(0, 3);
+  const factChecks = allArticles.filter(a => 
+    ['fact-check', 'Fact Check'].includes(a.type) || 
+    ['fact-check', 'Fact Check'].includes(a.category)
+  ).slice(0, 4);
+  const opinions = allArticles.filter(a => 
+    ['opinion', 'Opinion'].includes(a.type) || 
+    ['opinions', 'Opinions', 'opinion', 'Opinion'].includes(a.category)
+  ).slice(0, 4);
+  const bangladeshNews = allArticles.filter(a => 
+    ['national', 'politics', 'bangladesh', 'National', 'Politics', 'Bangladesh'].includes(a.category)
+  ).slice(0, 6);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -121,12 +159,7 @@ export default async function Home({
                       ? 'প্রতি সপ্তাহে আমাদের সেরা অনুসন্ধানগুলো পেতে ৪৫,০০০+ পাঠকের সাথে যোগ দিন।' 
                       : 'Join 45,000+ readers getting our top investigations every week.'}
                   </p>
-                  <form className="relative z-10 flex flex-col gap-3">
-                    <input type="email" placeholder={isBangla ? "আপনার ইমেইল" : "Your work email"} className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 text-sm placeholder:text-white/40 focus:outline-none focus:bg-white/20 transition-all" />
-                    <button className="w-full bg-white text-primary font-bold py-3 rounded-xl hover:bg-opacity-90 transition-all text-sm">
-                      {isBangla ? 'ফ্রি সাবস্ক্রাইব' : 'Subscribe Free'}
-                    </button>
-                  </form>
+                  <SubscribeForm locale={locale} variant="sidebar" />
                 </div>
               </div>
             </div>
@@ -268,17 +301,21 @@ export default async function Home({
             <div className="flex gap-4">
                <div className="bg-surface px-6 py-3 rounded-full border border-border text-title font-bold text-sm flex items-center gap-2">
                  <Users size={18} className="text-primary" />
-                 {isBangla ? '৪২ জন সাংবাদিক' : '42 Journalists'}
+                 {isBangla 
+                   ? `${displayAuthors.length} জন সাংবাদিক` 
+                   : `${displayAuthors.length} ${displayAuthors.length === 1 ? 'Journalist' : 'Journalists'}`}
                </div>
                <div className="bg-surface px-6 py-3 rounded-full border border-border text-title font-bold text-sm flex items-center gap-2">
                  <Globe size={18} className="text-primary" />
-                 {isBangla ? '১২টি ব্যুরো' : '12 Bureaus'}
+                 {isBangla 
+                   ? `${Math.max(1, Math.ceil(displayAuthors.length * 0.5))}টি ব্যুরো` 
+                   : `${Math.max(1, Math.ceil(displayAuthors.length * 0.5))} ${Math.max(1, Math.ceil(displayAuthors.length * 0.5)) === 1 ? 'Bureau' : 'Bureaus'}`}
                </div>
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {authors.slice(0, 4).map((author) => (
+            {displayAuthors.slice(0, 4).map((author) => (
               <div key={author.id} className="group relative">
                 <div className="bg-card rounded-[2.5rem] p-8 border border-border/50 hover:border-primary transition-all duration-500 hover:shadow-premium group-hover:-translate-y-2 overflow-hidden">
                   {/* Decorative element */}

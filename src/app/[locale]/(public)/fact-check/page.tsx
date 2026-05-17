@@ -22,7 +22,10 @@ export default async function FactCheckPage({
   const client = await clientPromise;
   const db = client.db('the-reform-times-news');
   const rawArticles = await db.collection('articles')
-    .find({ type: 'fact-check', status: 'Published' })
+    .find({ 
+      type: { $in: ['Fact Check', 'fact-check'] }, 
+      status: 'Published' 
+    })
     .sort({ createdAt: -1 })
     .toArray();
 

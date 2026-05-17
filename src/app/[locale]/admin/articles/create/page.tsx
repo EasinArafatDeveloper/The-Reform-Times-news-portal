@@ -65,7 +65,8 @@ export default function CreateArticlePage() {
     breaking: false,
     trending: false,
     readTime: '5 min read',
-    visibility: 'Public'
+    visibility: 'Public',
+    sendPush: false
   });
 
   // Simulated content blocks
@@ -576,22 +577,20 @@ export default function CreateArticlePage() {
                       <option value="Draft">Draft</option>
                       <option value="Pending Review">Pending Review</option>
                       <option value="Published">Published</option>
-                      <option value="Scheduled">Scheduled</option>
-                      <option value="Archived">Archived</option>
                     </select>
                   </div>
 
-                  <div>
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-caption mb-1.5 block">Bilingual Visibility</label>
-                    <select 
-                      value={formData.visibility} 
-                      onChange={(e) => handleFieldChange('visibility', e.target.value)} 
-                      className="w-full bg-surface border border-border rounded-xl p-2.5 outline-none text-xs md:text-sm font-bold text-title focus:ring-2 focus:ring-primary/10 transition-all"
-                    >
-                      <option value="Public">Public Network</option>
-                      <option value="Subscribers Only">Subscribers Only</option>
-                      <option value="Premium">Premium Access</option>
-                    </select>
+                  <div className="flex items-center gap-2 pt-3 border-t border-border/60">
+                    <input 
+                      type="checkbox" 
+                      id="sendPush"
+                      checked={formData.sendPush}
+                      onChange={(e) => handleFieldChange('sendPush', e.target.checked)}
+                      className="w-4 h-4 rounded text-primary border-border bg-surface focus:ring-primary/20 accent-primary cursor-pointer"
+                    />
+                    <label htmlFor="sendPush" className="text-xs font-bold text-title cursor-pointer select-none">
+                      Send push notification to subscribers
+                    </label>
                   </div>
                 </div>
               </div>
@@ -958,10 +957,10 @@ export default function CreateArticlePage() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-surface border border-border shrink-0 overflow-hidden flex items-center justify-center font-bold text-caption text-sm">
-                      SA
+                      KS
                     </div>
                     <div>
-                      <p className="font-extrabold text-title text-xs sm:text-sm font-sans">Salman Ahmed</p>
+                      <p className="font-extrabold text-title text-xs sm:text-sm font-sans">Kazi Salman</p>
                       <p className="text-[10px] text-caption font-bold uppercase mt-0.5 font-sans">
                         Political Dispatcher • {formData.readTime}
                       </p>
@@ -971,7 +970,7 @@ export default function CreateArticlePage() {
                   {/* Reading & Print Tools toolbar */}
                   <div className="flex items-center gap-2 shrink-0">
                     <button 
-                      onClick={() => alert("Simulated: Draft link copied successfully!")}
+                      onClick={() => toast.success("Draft link copied successfully!")}
                       className="px-2.5 py-1.5 bg-surface border border-border rounded-lg text-[10px] font-bold text-body hover:bg-card hover:border-border transition-all flex items-center gap-1 cursor-pointer font-sans"
                     >
                       Copy Link

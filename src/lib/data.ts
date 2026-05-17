@@ -75,47 +75,47 @@ export const categories: Category[] = [
 export const authors: Author[] = [
   {
     id: '1',
-    name: 'Sarah Jenkins',
-    role: { en: 'Senior Investigative Reporter', bn: 'সিনিয়র অনুসন্ধানী প্রতিবেদক' },
+    name: 'Kazi Salman',
+    role: { en: 'Editor-in-Chief', bn: 'প্রধান সম্পাদক' },
     bio: { 
-      en: 'Award-winning journalist focusing on corporate corruption and public policy.', 
-      bn: 'করপোরেট দুর্নীতি এবং জননীতি নিয়ে কাজ করা একজন পুরস্কারপ্রাপ্ত সাংবাদিক।' 
+      en: 'Founder and Editor-in-Chief of The Reform Times. Dedicated to human rights, truth, and structural transparency.', 
+      bn: 'দ্য রিফর্ম টাইমসের প্রতিষ্ঠাতা ও প্রধান সম্পাদক। মানবাধিকার, সত্য এবং কাঠামোগত স্বচ্ছতার প্রতি নিবেদিত।' 
     },
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150&h=150',
-    articleCount: 142
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150&h=150',
+    articleCount: 148
   },
   {
     id: '2',
-    name: 'David Chen',
-    role: { en: 'Human Rights Correspondent', bn: 'মানবাধিকার প্রতিনিধি' },
+    name: 'Tasmia Rahman',
+    role: { en: 'Senior Investigative Journalist', bn: 'সিনিয়র অনুসন্ধানী সাংবাদিক' },
     bio: { 
-      en: 'Covering global human rights issues, migration, and social justice.', 
-      bn: 'বিশ্বব্যাপী মানবাধিকার ইস্যু, অভিবাসন এবং সামাজিক ন্যায়বিচার নিয়ে কাজ করছেন।' 
+      en: 'Specializes in exposing corruption, public policy malpractices, and corporate accountability stories.', 
+      bn: 'দুর্নীতি উন্মোচন, সরকারি নীতিমালার অপপ্রয়োগ এবং করপোরেট জবাবদিহিতা সংক্রান্ত সংবাদে দক্ষ।' 
     },
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150&h=150',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150&h=150',
     articleCount: 89
   },
   {
     id: '3',
-    name: 'Elena Rodriguez',
-    role: { en: 'Political Editor', bn: 'রাজনৈতিক সম্পাদক' },
+    name: 'Abrar Chowdhury',
+    role: { en: 'Lead Fact-Checker', bn: 'প্রধান তথ্য-যাচাইকারী' },
     bio: { 
-      en: 'Expert analysis on national politics, elections, and legislative reforms.', 
-      bn: 'জাতীয় রাজনীতি, নির্বাচন এবং আইনী সংস্কারের বিশেষজ্ঞ বিশ্লেষক।' 
+      en: 'Combats digital misinformation, political propaganda, and viral deepfakes through rigorous verification.', 
+      bn: 'কঠোর তথ্য-যাচাইয়ের মাধ্যমে ডিজিটাল অপপ্রচার, রাজনৈতিক প্রোপাগান্ডা এবং ভাইরাল ভুয়া খবরের মোকাবিলা করেন।' 
     },
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150&h=150',
-    articleCount: 215
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150&h=150',
+    articleCount: 112
   },
   {
     id: '4',
-    name: 'Marcus Thorne',
-    role: { en: 'Fact-Check Lead', bn: 'ফ্যাক্ট-চেক প্রধান' },
+    name: 'Nabila Hasan',
+    role: { en: 'Human Rights Correspondent', bn: 'মানবাধিকার প্রতিনিধি' },
     bio: { 
-      en: 'Dedicated to verifying claims and combating misinformation in digital media.', 
-      bn: 'ডিজিটাল মিডিয়াতে তথ্যের সত্যতা যাচাই এবং অপপ্রচার মোকাবিলায় নিবেদিত।' 
+      en: 'Covers humanitarian crises, minority rights, climate refugees, and grassroots social movements.', 
+      bn: 'মানবিক সংকট, সংখ্যালঘু অধিকার, জলবায়ু শরণার্থী এবং প্রান্তিক সামাজিক আন্দোলন নিয়ে কাজ করেন।' 
     },
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150&h=150',
-    articleCount: 310
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150&h=150',
+    articleCount: 76
   }
 ];
 

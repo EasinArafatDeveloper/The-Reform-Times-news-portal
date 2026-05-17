@@ -24,8 +24,8 @@ export default async function VideoPage({
   const rawArticles = await db.collection('articles')
     .find({ 
       $or: [
-        { type: 'video' },
-        { category: 'video' }
+        { type: { $in: ['Video Report', 'video'] } },
+        { category: { $in: ['Video', 'video'] } }
       ],
       status: 'Published' 
     })

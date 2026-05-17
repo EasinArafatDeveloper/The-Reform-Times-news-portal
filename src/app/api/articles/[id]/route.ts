@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { sendArticlePushNotification } from '@/lib/push-helper';
 
 // GET specific article for editing
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -44,6 +45,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       query,
       { $set: { ...body, updatedAt: new Date() } }
     );
+
+    // If published and sendPush checkmark is checked, trigger web push notifications
+    if ((body.status === 'Published' || body.status === 'published') && body.sendPush) {
+      try {
+        await sendArticlePushNotification({ ...body, id });
+      } catch (pushErr) {
+        console.error('Failed to trigger web push notification:', pushErr);
+      }
+    }
     
     return NextResponse.json({ success: true });
   } catch (error: any) {

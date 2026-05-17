@@ -78,6 +78,14 @@ export default async function NewsDetailsPage({ params }: { params: Promise<{ sl
     ]
   }) as any;
 
+  if (article && article._id) {
+    db.collection('articles').updateOne(
+      { _id: article._id },
+      { $inc: { views: 1 } }
+    ).catch(err => console.error('Error incrementing views:', err));
+    article.views = (article.views || 0) + 1;
+  }
+
   if (!article) {
     article = mockArticles.find(a => {
       const s = getLocalizedContent<string>(a.slug, 'en');

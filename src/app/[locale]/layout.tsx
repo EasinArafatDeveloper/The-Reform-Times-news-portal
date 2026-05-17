@@ -14,6 +14,8 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Toaster } from 'react-hot-toast';
+import CookieConsentBanner from "@/components/shared/CookieConsentBanner";
+import PushNotificationPrompt from "@/components/shared/PushNotificationPrompt";
 
 export default async function RootLayout({
   children,
@@ -39,6 +41,8 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <CookieConsentBanner />
+          <PushNotificationPrompt />
           <Toaster 
             position="bottom-right" 
             toastOptions={{

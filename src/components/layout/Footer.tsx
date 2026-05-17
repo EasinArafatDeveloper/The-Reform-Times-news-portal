@@ -3,6 +3,7 @@ import { Mail, ArrowUpRight, ShieldCheck, Globe, Users } from 'lucide-react';
 import { TwitterIcon, FacebookIcon, InstagramIcon, YoutubeIcon } from '@/components/ui/icons';
 import { categories } from '@/lib/data';
 import { getLocalizedContent, getTranslation } from '@/lib/i18n-utils';
+import SubscribeForm from '@/components/shared/SubscribeForm';
 
 export function Footer({ locale = 'bn' }: { locale?: string }) {
   const t = (key: string) => getTranslation(locale, key);
@@ -26,16 +27,7 @@ export function Footer({ locale = 'bn' }: { locale?: string }) {
                 : 'Join a growing community of informed citizens dedicated to transparency and truth.'}
             </p>
           </div>
-          <form className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto min-w-[300px] md:min-w-[450px]">
-            <input 
-              type="email" 
-              placeholder={isBangla ? "আপনার ইমেইল লিখুন" : "Enter your work email"} 
-              className="flex-1 bg-white/10 border border-white/20 px-6 py-4 rounded-xl text-sm focus:outline-none focus:border-primary transition-all backdrop-blur-md"
-            />
-            <button className="bg-primary text-white px-8 py-4 rounded-xl font-bold text-sm hover:scale-105 transition-transform shadow-lg shadow-primary/20">
-              {isBangla ? 'এখনই যোগ দিন' : 'Join Now'}
-            </button>
-          </form>
+          <SubscribeForm locale={locale} variant="footer" />
         </div>
       </div>
 
@@ -121,13 +113,13 @@ export function Footer({ locale = 'bn' }: { locale?: string }) {
                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">
                     {isBangla ? 'নিউজ টিপস' : 'News Tips'}
                    </p>
-                   <p className="text-sm font-bold text-white/80">tips@reformtimes.com</p>
+                   <p className="text-sm font-bold text-white/80"><a href="mailto:thereformtimes@gmail.com" className="hover:text-primary transition-colors">thereformtimes@gmail.com</a></p>
                 </div>
                 <div>
                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">
                     {isBangla ? 'সাধারণ অনুসন্ধান' : 'General Inquiries'}
                    </p>
-                   <p className="text-sm font-bold text-white/80">hello@reformtimes.com</p>
+                   <p className="text-sm font-bold text-white/80"><a href="mailto:thereformtimes@gmail.com" className="hover:text-primary transition-colors">thereformtimes@gmail.com</a></p>
                 </div>
                 <div className="bg-primary/10 border border-primary/20 p-4 rounded-xl">
                    <p className="text-xs font-bold text-primary mb-2 flex items-center gap-2">
