@@ -12,7 +12,7 @@
 
 ## 🌐 Live Portal URL
 Experience the high-performance newsroom live:  
-👉 **[The Reform Times Live](https://the-reform-times-news-portal.vercel.app)** *(Update with your production Vercel/Netlify URL)*
+👉 **[The Reform Times Live](https://thereformtimes.vercel.app)**
 
 ---
 
