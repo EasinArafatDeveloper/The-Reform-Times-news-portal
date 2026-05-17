@@ -75,9 +75,9 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
   };
 
   return (
-    <div className="border border-gray-100 rounded-2xl overflow-hidden bg-white shadow-sm">
+    <div className="border border-border rounded-2xl overflow-hidden bg-card text-title shadow-sm flex-1 flex flex-col">
       {/* Toolbar */}
-      <div className="bg-gray-50/50 border-b border-gray-100 p-2 flex flex-wrap gap-1">
+      <div className="bg-surface border-b border-border p-2 flex flex-wrap gap-1">
         <ToolbarButton 
           onClick={() => editor.chain().focus().toggleBold().run()} 
           active={editor.isActive('bold')}
@@ -100,7 +100,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
           <UnderlineIcon size={18} />
         </ToolbarButton>
         
-        <div className="w-px h-6 bg-gray-200 mx-1" />
+        <div className="w-px h-6 bg-border mx-1" />
 
         <ToolbarButton 
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} 
@@ -117,7 +117,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
           <Heading2 size={18} />
         </ToolbarButton>
 
-        <div className="w-px h-6 bg-gray-200 mx-1" />
+        <div className="w-px h-6 bg-border mx-1" />
 
         <ToolbarButton 
           onClick={() => editor.chain().focus().toggleBulletList().run()} 
@@ -134,7 +134,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
           <Quote size={18} />
         </ToolbarButton>
 
-        <div className="w-px h-6 bg-gray-200 mx-1" />
+        <div className="w-px h-6 bg-border mx-1" />
 
         <ToolbarButton 
           onClick={setLink} 
@@ -151,16 +151,16 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
           <Highlighter size={18} />
         </ToolbarButton>
 
-        <div className="w-px h-6 bg-gray-200 mx-1" />
+        <div className="w-px h-6 bg-border mx-1" />
 
-        <label className="p-2 text-gray-500 hover:text-brand-red hover:bg-white rounded-lg transition-all cursor-pointer" title="Upload Image">
+        <label className="p-2 text-caption hover:text-primary hover:bg-surface rounded-lg transition-all cursor-pointer" title="Upload Image">
           <ImageIcon size={18} />
           <input type="file" className="hidden" accept="image/*" onChange={addImage} />
         </label>
       </div>
 
       {/* Editor Content */}
-      <div className="p-6 min-h-[400px] prose prose-sm max-w-none focus:outline-none">
+      <div className="p-6 min-h-[400px] prose prose-sm dark:prose-invert max-w-none focus:outline-none text-body">
         <EditorContent editor={editor} className="outline-none" />
       </div>
 
@@ -172,7 +172,8 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
         .ProseMirror p.is-editor-empty:first-child::before {
           content: attr(data-placeholder);
           float: left;
-          color: #adb5bd;
+          color: var(--text-caption);
+          opacity: 0.5;
           pointer-events: none;
           height: 0;
         }
@@ -182,10 +183,10 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
           margin: 20px 0;
         }
         .ProseMirror blockquote {
-          border-left: 4px solid #700b0b;
+          border-left: 4px solid var(--primary);
           padding-left: 20px;
           font-style: italic;
-          color: #4a5568;
+          color: var(--text-body);
         }
       `}</style>
     </div>
@@ -199,7 +200,7 @@ function ToolbarButton({ children, onClick, active, title }: any) {
       title={title}
       className={cn(
         "p-2 rounded-lg transition-all",
-        active ? "bg-brand-red text-white" : "text-gray-500 hover:text-brand-red hover:bg-white"
+        active ? "bg-primary text-white" : "text-caption hover:text-primary hover:bg-surface"
       )}
     >
       {children}

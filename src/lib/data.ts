@@ -19,24 +19,43 @@ export interface Author {
   articleCount?: number;
 }
 
+export interface ArticleLocation {
+  country?: string;
+  division?: string;
+  district?: string;
+  upazila?: string;
+}
+
 export interface Article {
-  id: string;
+  _id?: string;
+  id?: string;
   slug: BilingualString;
   title: BilingualString;
   excerpt: BilingualString;
   content: BilingualString;
-  category: string; // References category id
-  author: Author;
-  date: string;
-  readTime: BilingualString;
-  image: string;
-  tags: BilingualString[];
-  type?: 'standard' | 'investigation' | 'opinion' | 'fact-check' | 'video';
-  factCheckStatus?: 'Verified' | 'False' | 'Misleading' | 'Under Review';
-  breaking?: boolean;
-  featured?: boolean;
   seoTitle?: BilingualString;
   metaDescription?: BilingualString;
+  category: string;
+  subCategory?: string;
+  author: any;
+  authorId?: string;
+  image?: string;
+  mainImage?: string;
+  gallery?: string[];
+  tags?: string[] | BilingualString[];
+  location?: ArticleLocation;
+  type?: 'standard' | 'investigation' | 'opinion' | 'fact-check' | 'video';
+  status?: 'Draft' | 'Pending Review' | 'Published' | 'Scheduled' | 'Archived' | 'published' | 'draft';
+  featured?: boolean;
+  breaking?: boolean;
+  trending?: boolean;
+  factCheckStatus?: 'Verified' | 'False' | 'Misleading' | 'Under Review';
+  publishedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  date?: string;
+  readTime?: string | BilingualString;
+  views?: number;
 }
 
 export const categories: Category[] = [

@@ -1,4 +1,5 @@
-import { mockArticles } from "@/lib/data";
+import { serializeMongo } from "@/lib/utils";
+import clientPromise from "@/lib/mongodb";
 import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,7 +19,23 @@ export default async function VideoPage({
   const isBangla = locale === 'bn';
   const t = (key: string) => getTranslation(locale, key);
   
-  const videos = mockArticles.filter(a => a.type === 'video' || a.category === 'video');
+  const client = await clientPromise;
+  const db = client.db('the-reform-times-news');
+  const rawArticles = await db.collection('articles')
+    .find({ 
+      $or: [
+        { type: 'video' },
+        { category: 'video' }
+      ],
+      status: 'Published' 
+    })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  const videos = serializeMongo((rawArticles as any[]).map(a => ({
+    ...a,
+    id: a._id ? a._id.toString() : a.id,
+  })));
 
   return (
     <div className="bg-black text-white min-h-screen">
@@ -46,8 +63,8 @@ export default async function VideoPage({
                 <div key={article.id} className={`group ${i === 0 ? 'md:col-span-2 lg:col-span-2 md:row-span-2' : ''}`}>
                   <Link href={`/${locale}/news/${localizedSlug}`} className="block relative w-full aspect-video overflow-hidden border border-white/10 group-hover:border-white/30 transition-colors">
                     <Image 
-                      src={article.image} 
-                      alt={localizedTitle}
+                      src={article.image || article.mainImage || 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800'} 
+                      alt={localizedTitle || 'Video Image'}
                       fill
                       className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105"
                     />

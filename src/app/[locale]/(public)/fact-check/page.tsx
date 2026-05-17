@@ -1,4 +1,5 @@
-import { mockArticles } from "@/lib/data";
+import { serializeMongo } from "@/lib/utils";
+import clientPromise from "@/lib/mongodb";
 import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,7 +19,17 @@ export default async function FactCheckPage({
   const isBangla = locale === 'bn';
   const t = (key: string) => getTranslation(locale, key);
   
-  const factChecks = mockArticles.filter(a => a.type === 'fact-check');
+  const client = await clientPromise;
+  const db = client.db('the-reform-times-news');
+  const rawArticles = await db.collection('articles')
+    .find({ type: 'fact-check', status: 'Published' })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  const factChecks = serializeMongo((rawArticles as any[]).map(a => ({
+    ...a,
+    id: a._id ? a._id.toString() : a.id,
+  })));
 
   return (
     <div className="bg-brand-gray-light min-h-screen">
@@ -48,8 +59,8 @@ export default async function FactCheckPage({
                 <Link key={article.id} href={`/${locale}/news/${localizedSlug}`} className="group flex flex-col bg-white border border-gray-200 hover:border-brand-navy transition-colors h-full">
                   <div className="relative h-56 w-full overflow-hidden">
                     <Image 
-                      src={article.image} 
-                      alt={localizedTitle}
+                      src={article.image || article.mainImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600'} 
+                      alt={localizedTitle || 'Article Image'}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />

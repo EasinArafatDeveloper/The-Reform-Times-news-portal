@@ -45,7 +45,7 @@ export default function HeroSlider({ articles, locale }: HeroSliderProps) {
   const slug = getLocalizedContent<string>(currentArticle.slug, locale);
   const readTime = getLocalizedContent<string>(currentArticle.readTime || "", locale);
 
-  const formattedDate = format(new Date(currentArticle.date), isBangla ? 'd MMMM, yyyy' : 'MMMM d, yyyy', {
+  const formattedDate = format(new Date(currentArticle.createdAt || currentArticle.publishedAt || currentArticle.date || new Date()), isBangla ? 'd MMMM, yyyy' : 'MMMM d, yyyy', {
     locale: isBangla ? bnLocale : undefined
   });
 
@@ -84,8 +84,8 @@ export default function HeroSlider({ articles, locale }: HeroSliderProps) {
         >
           <div className="relative w-full h-full">
             <Image 
-              src={currentArticle.image} 
-              alt={title}
+              src={currentArticle.image || currentArticle.mainImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200'} 
+              alt={title || 'Slide Image'}
               fill
               priority
               className="object-cover"

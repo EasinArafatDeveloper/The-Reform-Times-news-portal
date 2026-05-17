@@ -22,13 +22,23 @@ export async function GET() {
       .limit(5)
       .toArray();
 
-    const activity = recentArticles.map(article => ({
-      id: article._id,
-      user: article.author || 'System',
-      action: article.status === 'Published' ? 'published' : 'saved',
-      target: article.title,
-      time: 'Just now' // Simplified for demo
-    }));
+    const activity = recentArticles.map(article => {
+      const authorName = typeof article.author === 'object' && article.author
+        ? (article.author.name || 'Staff Reporter')
+        : (article.author || 'System');
+
+      const titleText = typeof article.title === 'object' && article.title
+        ? (article.title.en || article.title.bn || 'Untitled')
+        : (article.title || 'Untitled');
+
+      return {
+        id: article._id,
+        user: authorName,
+        action: article.status === 'Published' ? 'published' : 'saved',
+        target: titleText,
+        time: 'Just now'
+      };
+    });
 
     return NextResponse.json({
       stats: {

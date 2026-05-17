@@ -1,3 +1,4 @@
+import clientPromise from "@/lib/mongodb";
 import { mockArticles, trendingTopics, authors } from "@/lib/data";
 import { fetchRealNews } from "@/lib/api";
 import { HeroSection } from "@/components/home/HeroSection";
@@ -5,7 +6,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { NewsCard } from "@/components/shared/NewsCard";
 import { PlayCircle, ShieldCheck, ArrowRight, TrendingUp, Search, User, CheckCircle2, MessageSquareQuote, Clock, Users, Globe, TrendingDown } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, serializeMongo } from "@/lib/utils";
 import { format } from "date-fns";
 import { bn as bnLocale } from "date-fns/locale";
 import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
@@ -20,13 +21,24 @@ export default async function Home({
 
   const t = (key: string) => getTranslation(locale, key);
 
-  const realNews = await fetchRealNews();
-  const allArticles = Array.isArray(realNews) && realNews.length > 0 ? realNews : mockArticles;
+  const client = await clientPromise;
+  const db = client.db('the-reform-times-news');
+  const rawArticles = await db.collection('articles')
+    .find({ status: 'Published' })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  const allArticles = rawArticles.length > 0 
+    ? serializeMongo((rawArticles as any[]).map(a => ({
+        ...a,
+        id: a._id ? a._id.toString() : a.id,
+      })))
+    : mockArticles;
   
   const latestNews = allArticles.slice(0, 8);
   const investigations = allArticles.filter(a => a.type === 'investigation' || a.category === 'investigations').slice(0, 3);
   const factChecks = allArticles.filter(a => a.category === 'fact-check' || a.type === 'fact-check').slice(0, 4);
-  const opinions = allArticles.filter(a => a.type === 'opinion' || a.category === 'opinion').slice(0, 4);
+  const opinions = allArticles.filter(a => a.type === 'opinion' || a.category === 'opinions' || a.category === 'opinion').slice(0, 4);
   const bangladeshNews = allArticles.filter(a => a.category === 'national' || a.category === 'politics' || a.category === 'bangladesh').slice(0, 6);
 
   return (
@@ -203,8 +215,10 @@ export default async function Home({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {opinions.slice(0, 3).map((article, i) => (
               <div key={article.id} className={cn(
-                "group p-8 rounded-3xl transition-all",
-                i === 0 ? "bg-title text-white lg:col-span-1 shadow-2xl" : "bg-white border border-border"
+                "group p-8 rounded-3xl transition-all shadow-sm hover:shadow-premium border",
+                i === 0 
+                  ? "bg-secondary text-white lg:col-span-1 shadow-2xl border-transparent" 
+                  : "bg-card border-border text-body"
               )}>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary/30 p-0.5 group-hover:border-primary transition-all">
@@ -212,7 +226,7 @@ export default async function Home({
                   </div>
                   <div>
                     <h4 className={cn("font-bold text-lg", i === 0 ? "text-white" : "text-title")}>{article.author.name}</h4>
-                    <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">
+                    <p className={cn("text-[10px] font-black uppercase tracking-[0.2em]", i === 0 ? "text-red-400" : "text-primary")}>
                       {getLocalizedContent<string>(article.author.role, locale)}
                     </p>
                   </div>
@@ -222,16 +236,16 @@ export default async function Home({
                     "{getLocalizedContent<string>(article.title, locale)}"
                   </h3>
                 </Link>
-                <p className={cn("text-sm line-clamp-4 leading-relaxed italic mb-8 opacity-70", i === 0 ? "text-white/80" : "text-caption")}>
+                <p className={cn("text-sm line-clamp-4 leading-relaxed italic mb-8 opacity-80", i === 0 ? "text-white/80" : "text-caption")}>
                   {getLocalizedContent<string>(article.excerpt, locale)}
                 </p>
-                <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                <div className={cn("flex items-center justify-between pt-6 border-t", i === 0 ? "border-white/10" : "border-border")}>
                   <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">
-                    {format(new Date(article.date), isBangla ? 'd MMMM, yyyy' : 'MMMM d, yyyy', { 
+                    {format(new Date(article.createdAt || article.publishedAt || article.date || new Date()), isBangla ? 'd MMMM, yyyy' : 'MMMM d, yyyy', { 
                       locale: isBangla ? bnLocale : undefined 
                     })}
                   </span>
-                  <MessageSquareQuote size={20} className="text-primary opacity-50" />
+                  <MessageSquareQuote size={20} className={cn(i === 0 ? "text-white/50" : "text-primary opacity-50")} />
                 </div>
               </div>
             ))}

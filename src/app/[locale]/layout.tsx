@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { Toaster } from 'react-hot-toast';
 
 export default async function RootLayout({
   children,
@@ -38,6 +39,41 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster 
+            position="bottom-right" 
+            toastOptions={{
+              className: 'font-sans font-semibold text-sm',
+              style: {
+                borderRadius: '16px',
+                background: '#151c2c',
+                color: '#f8fafc',
+                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #1e293b',
+              },
+              success: {
+                style: {
+                  background: '#f0fdf4',
+                  color: '#14532d',
+                  border: '1px solid #bbf7d0',
+                },
+                iconTheme: {
+                  primary: '#16a34a',
+                  secondary: '#f0fdf4',
+                },
+              },
+              error: {
+                style: {
+                  background: '#fff1f2',
+                  color: '#4c0519',
+                  border: '1px solid #fecdd3',
+                },
+                iconTheme: {
+                  primary: '#e11d48',
+                  secondary: '#fff1f2',
+                },
+              },
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>

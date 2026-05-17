@@ -36,7 +36,8 @@ export async function fetchRealNews(): Promise<Article[]> {
           { en: 'World News', bn: 'বিশ্ব সংবাদ' },
           { en: 'Breaking', bn: 'ব্রেকিং নিউজ' }
         ],
-        type: 'standard'
+        type: 'standard',
+        status: 'Published'
       } as Article;
     });
   } catch (error) {

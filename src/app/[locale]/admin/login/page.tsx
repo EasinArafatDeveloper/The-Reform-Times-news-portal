@@ -10,7 +10,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
@@ -18,13 +18,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const params = useParams();
+  const locale = params?.locale as string || 'bn';
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     // Simulate login
     setTimeout(() => {
-      router.push('/admin/dashboard');
+      router.push(`/${locale}/admin/dashboard`);
     }, 1500);
   };
 

@@ -1,3 +1,5 @@
+import { serializeMongo } from "@/lib/utils";
+import clientPromise from "@/lib/mongodb";
 import { mockArticles, categories } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { NewsCard } from "@/components/shared/NewsCard";
@@ -26,21 +28,46 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   }
 
   const categoryName = getLocalizedContent<string>(category.name, locale);
-  const categoryArticles = mockArticles.filter(a => {
-    const articleCategory = getLocalizedContent<string>(a.category, 'en').toLowerCase();
-    return articleCategory === slug.toLowerCase();
-  });
+
+  const client = await clientPromise;
+  const db = client.db('the-reform-times-news');
+  
+  // Build category search criteria
+  let categoryQuery: any = { category: slug.toLowerCase() };
+  if (slug.toLowerCase() === 'bangladesh') {
+    categoryQuery = { category: { $in: ['bangladesh', 'national', 'politics'] } };
+  } else if (slug.toLowerCase() === 'international') {
+    categoryQuery = { category: { $in: ['international', 'world'] } };
+  }
+
+  const rawArticles = await db.collection('articles')
+    .find({
+      ...categoryQuery,
+      status: 'Published'
+    })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  const categoryArticles = rawArticles.length > 0
+    ? serializeMongo((rawArticles as any[]).map(a => ({
+        ...a,
+        id: a._id ? a._id.toString() : a.id,
+      })))
+    : mockArticles.filter(a => {
+        const articleCategory = getLocalizedContent<string>(a.category, 'en').toLowerCase();
+        return articleCategory === slug.toLowerCase() || (slug.toLowerCase() === 'bangladesh' && ['national', 'politics', 'bangladesh'].includes(articleCategory));
+      });
   
   const featuredArticle = categoryArticles[0];
   const remainingArticles = categoryArticles.slice(1);
 
   return (
-    <div className="bg-white dark:bg-background min-h-screen">
+    <div className="bg-white dark:bg-background min-h-screen text-title transition-colors">
       {/* Category Hero */}
-      <div className="bg-secondary text-white py-16 md:py-24">
+      <div className="bg-secondary py-16 md:py-24">
         <div className="container max-w-4xl text-center">
-          <h1 className="font-serif font-bold text-4xl md:text-6xl mb-4">{categoryName}</h1>
-          <p className="text-xl text-white/70 font-serif italic">
+          <h1 className="font-serif font-bold text-4xl md:text-6xl mb-4 !text-white">{categoryName}</h1>
+          <p className="text-xl !text-white/80 font-serif italic">
             {isBangla 
               ? `${categoryName} নিয়ে সর্বশেষ সংবাদ, অনুসন্ধান এবং প্রতিবেদনসমূহ।` 
               : `Latest news, investigations, and reports on ${categoryName}.`}

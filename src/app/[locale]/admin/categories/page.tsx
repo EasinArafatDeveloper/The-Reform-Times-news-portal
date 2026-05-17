@@ -1,0 +1,278 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { 
+  Plus, 
+  Search, 
+  Edit, 
+  Trash2, 
+  Eye,
+  BarChart2,
+  Layers,
+  X,
+  AlertCircle
+} from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { cn } from '@/lib/utils';
+
+export default function CategoriesPage() {
+  const params = useParams();
+  const locale = (params?.locale as string) || 'en';
+
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [editingCat, setEditingCat] = useState<any>(null);
+  
+  // Form State
+  const [formData, setFormData] = useState({ name: { bn: '', en: '' }, slug: '', color: '#8B0000' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Helper to resolve localized name
+  const getBilingualValue = (field: any, fallback: string = '') => {
+    if (!field) return fallback;
+    if (typeof field === 'string') return field;
+    return field[locale] || field['en'] || field['bn'] || fallback;
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/categories');
+      const data = await res.json();
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOpenModal = (cat: any = null) => {
+    if (cat) {
+      setEditingCat(cat);
+      setFormData({
+        name: typeof cat.name === 'string' ? { bn: cat.name, en: cat.name } : { bn: cat.name?.bn || '', en: cat.name?.en || '' },
+        slug: cat.slug || '',
+        color: cat.color || '#8B0000'
+      });
+    } else {
+      setEditingCat(null);
+      setFormData({
+        name: { bn: '', en: '' },
+        slug: '',
+        color: '#8B0000'
+      });
+    }
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.bn || !formData.name.en || !formData.slug) {
+      return alert('Bangla Name, English Name and Slug are required');
+    }
+    
+    setIsSubmitting(true);
+    try {
+      const method = editingCat ? 'PUT' : 'POST';
+      const body = editingCat ? { ...formData, id: editingCat._id } : formData;
+
+      const res = await fetch('/api/categories', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        setShowModal(false);
+        fetchCategories();
+      }
+    } catch (err) {
+      alert('Action failed');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this category?')) return;
+    try {
+      const res = await fetch(`/api/categories?id=${id}`, { method: 'DELETE' });
+      if (res.ok) fetchCategories();
+    } catch (err) {
+      alert('Delete failed');
+    }
+  };
+
+  const filteredCategories = categories.filter(cat => {
+    const nameStr = getBilingualValue(cat.name);
+    return nameStr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           cat.slug?.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  return (
+    <div className="space-y-10 relative text-body">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-title">Editorial Categories</h1>
+          <p className="text-caption mt-1">Organize your journalism into sections and topics.</p>
+        </div>
+        <button 
+          onClick={() => handleOpenModal()}
+          className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-2xl font-bold hover:bg-primary/95 transition-all shadow-lg cursor-pointer"
+        >
+          <Plus size={20} />
+          Add New Category
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="lg:col-span-8 space-y-6">
+           <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-caption" size={20} />
+              <input 
+                type="text" 
+                placeholder="Search categories..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 bg-card border border-border text-title rounded-[24px] outline-none shadow-sm font-medium focus:border-primary transition-all placeholder:text-caption/40"
+              />
+           </div>
+
+           <div className="bg-card rounded-[32px] border border-border shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                 <table className="w-full text-left border-collapse">
+                    <thead>
+                       <tr className="bg-surface border-b border-border">
+                          <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-caption">Section Name</th>
+                          <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-caption">Articles</th>
+                          <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-caption text-right">Actions</th>
+                       </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                       {isLoading ? (
+                         [1,2,3,4,5].map(i => (
+                           <tr key={i} className="animate-pulse">
+                              <td colSpan={3} className="px-8 py-6 h-16 bg-surface/50"></td>
+                           </tr>
+                         ))
+                       ) : filteredCategories.map((cat) => {
+                         const catName = getBilingualValue(cat.name);
+                         return (
+                           <tr key={cat._id} className="hover:bg-surface transition-colors group">
+                              <td className="px-8 py-6">
+                                 <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold" style={{ backgroundColor: cat.color || '#8B0000' }}>
+                                       {catName.charAt(0)}
+                                    </div>
+                                    <div>
+                                       <p className="font-bold text-title">{catName}</p>
+                                       <p className="text-[10px] font-bold text-caption uppercase tracking-widest">/{cat.slug}</p>
+                                    </div>
+                                 </div>
+                              </td>
+                              <td className="px-8 py-6">
+                                 <span className="px-3 py-1 bg-surface border border-border rounded-full text-xs font-bold text-body">
+                                    {cat.articleCount || 0} items
+                                 </span>
+                              </td>
+                              <td className="px-8 py-6 text-right">
+                                 <div className="flex items-center justify-end gap-2">
+                                    <button onClick={() => handleOpenModal(cat)} className="p-2 text-caption hover:text-primary hover:bg-card rounded-lg transition-all cursor-pointer"><Edit size={16} /></button>
+                                    <button onClick={() => handleDelete(cat._id)} className="p-2 text-caption hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all cursor-pointer"><Trash2 size={16} /></button>
+                                 </div>
+                              </td>
+                           </tr>
+                         );
+                       })}
+                    </tbody>
+                 </table>
+              </div>
+           </div>
+        </div>
+
+        <div className="lg:col-span-4 space-y-6">
+           <div className="bg-[#0F172A] border border-slate-800 p-8 rounded-[32px] text-white space-y-4 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+              <div className="relative z-10 space-y-4">
+                 <div className="flex items-center gap-3">
+                    <BarChart2 className="text-amber-400" size={24} />
+                    <h3 className="font-bold text-xs uppercase tracking-widest text-slate-300">Category Stats</h3>
+                 </div>
+                 <p className="text-sm text-slate-400">Total Categories: <span className="text-white font-bold">{categories.length}</span></p>
+              </div>
+           </div>
+        </div>
+      </div>
+
+      {/* Modal Form */}
+      {showModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" onClick={() => setShowModal(false)}></div>
+           <div className="bg-card w-full max-w-md rounded-[32px] border border-border shadow-2xl relative z-10 overflow-hidden">
+              <div className="p-8 border-b border-border flex items-center justify-between">
+                 <h3 className="text-xl font-serif font-bold text-title">{editingCat ? 'Edit Category' : 'New Category'}</h3>
+                 <button onClick={() => setShowModal(false)} className="text-caption hover:text-rose-500 cursor-pointer"><X size={24} /></button>
+              </div>
+              <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                 <div className="space-y-2">
+                    <label className="text-xs font-bold text-caption uppercase tracking-widest">Category Name (Bangla)</label>
+                    <input 
+                      type="text" 
+                      value={formData.name.bn}
+                      onChange={(e) => {
+                        const bnVal = e.target.value;
+                        setFormData({
+                          ...formData,
+                          name: { ...formData.name, bn: bnVal },
+                          slug: formData.slug || bnVal.toLowerCase().replace(/ /g, '-')
+                        });
+                      }}
+                      className="w-full bg-surface border border-border text-title rounded-xl p-4 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
+                    />
+                 </div>
+                 <div className="space-y-2">
+                    <label className="text-xs font-bold text-caption uppercase tracking-widest">Category Name (English)</label>
+                    <input 
+                      type="text" 
+                      value={formData.name.en}
+                      onChange={(e) => {
+                        const enVal = e.target.value;
+                        setFormData({
+                          ...formData,
+                          name: { ...formData.name, en: enVal },
+                          slug: enVal.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+                        });
+                      }}
+                      className="w-full bg-surface border border-border text-title rounded-xl p-4 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
+                    />
+                 </div>
+                 <div className="space-y-2">
+                    <label className="text-xs font-bold text-caption uppercase tracking-widest">URL Slug</label>
+                    <input 
+                      type="text" 
+                      value={formData.slug}
+                      onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                      className="w-full bg-surface border border-border text-title rounded-xl p-4 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all"
+                    />
+                 </div>
+                 <div className="space-y-2">
+                    <label className="text-xs font-bold text-caption uppercase tracking-widest">Brand Color</label>
+                    <input type="color" value={formData.color} onChange={(e) => setFormData({...formData, color: e.target.value})} className="w-full h-12 bg-surface border border-border text-title rounded-xl p-1 cursor-pointer" />
+                 </div>
+                 <button type="submit" disabled={isSubmitting} className="w-full py-4 bg-primary hover:bg-primary/95 text-white rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+                   {isSubmitting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : (editingCat ? 'Update' : 'Create')}
+                 </button>
+              </form>
+           </div>
+        </div>
+      )}
+    </div>
+  );
+}

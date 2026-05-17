@@ -1,4 +1,5 @@
-import { mockArticles } from "@/lib/data";
+import { serializeMongo } from "@/lib/utils";
+import clientPromise from "@/lib/mongodb";
 import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,7 +18,23 @@ export default async function OpinionPage({
   const isBangla = locale === 'bn';
   const t = (key: string) => getTranslation(locale, key);
   
-  const opinions = mockArticles.filter(a => a.type === 'opinion' || a.category === 'opinion');
+  const client = await clientPromise;
+  const db = client.db('the-reform-times-news');
+  const rawArticles = await db.collection('articles')
+    .find({ 
+      $or: [
+        { type: 'opinion' },
+        { category: 'opinions' }
+      ],
+      status: 'Published' 
+    })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  const opinions = serializeMongo((rawArticles as any[]).map(a => ({
+    ...a,
+    id: a._id ? a._id.toString() : a.id,
+  })));
 
   return (
     <div className="bg-[#fcfcfc] min-h-screen">

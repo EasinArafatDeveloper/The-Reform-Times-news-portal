@@ -8,7 +8,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const client = await clientPromise;
     const db = client.db('the-reform-times-news');
-    const article = await db.collection('articles').findOne({ _id: new ObjectId(id) });
+    
+    let query = {};
+    try {
+      query = { _id: new ObjectId(id) };
+    } catch {
+      query = { id: id };
+    }
+
+    const article = await db.collection('articles').findOne(query);
     
     if (!article) return NextResponse.json({ error: 'Article not found' }, { status: 404 });
     return NextResponse.json(article);
@@ -25,14 +33,27 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const db = client.db('the-reform-times-news');
     const body = await req.json();
     
+    let query = {};
+    try {
+      query = { _id: new ObjectId(id) };
+    } catch {
+      query = { id: id };
+    }
+
     const result = await db.collection('articles').updateOne(
-      { _id: new ObjectId(id) },
+      query,
       { $set: { ...body, updatedAt: new Date() } }
     );
     
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to update article' }, { status: 500 });
+  } catch (error: any) {
+    const errMsg = error?.message || String(error);
+    console.error('Error updating article:', error);
+    const isMongoErr = errMsg.includes('Mongo') || errMsg.includes('SSL') || errMsg.includes('connect') || errMsg.includes('topology');
+    return NextResponse.json({ 
+      error: isMongoErr ? 'Database Connection Refused: Please whitelist your IP in MongoDB Atlas.' : 'Failed to update article', 
+      details: errMsg 
+    }, { status: 500 });
   }
 }
 
@@ -43,7 +64,14 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const client = await clientPromise;
     const db = client.db('the-reform-times-news');
     
-    await db.collection('articles').deleteOne({ _id: new ObjectId(id) });
+    let query = {};
+    try {
+      query = { _id: new ObjectId(id) };
+    } catch {
+      query = { id: id };
+    }
+
+    await db.collection('articles').deleteOne(query);
     
     return NextResponse.json({ success: true });
   } catch (error) {

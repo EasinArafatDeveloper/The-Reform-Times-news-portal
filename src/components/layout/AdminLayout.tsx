@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { i18n } from '@/i18n/config';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -64,14 +65,38 @@ const adminNavLinks = [
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [pathname]);
+
+  const segments = pathname.split('/');
+  const locale = i18n.locales.includes(segments[1] as any) ? segments[1] : i18n.defaultLocale;
+
   // Hide sidebar on login page
-  if (pathname === '/admin/login') return <>{children}</>;
+  if (pathname === `/${locale}/admin/login` || pathname === '/admin/login') return <>{children}</>;
 
   return (
     <div className="min-h-screen bg-surface flex font-sans">
+      {/* Backdrop overlay for mobile drawer */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity duration-300"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside 
         className={cn(
@@ -80,7 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         )}
       >
         <div className="p-6 flex items-center justify-between">
-          <Link href="/admin/dashboard" className={cn("font-serif font-bold text-xl transition-opacity", !isSidebarOpen && "lg:opacity-0")}>
+          <Link href={`/${locale}/admin/dashboard`} className={cn("font-serif font-bold text-xl transition-opacity", !isSidebarOpen && "lg:opacity-0")}>
             Reform<span className="text-primary">Admin</span>
           </Link>
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="lg:hidden text-white/60 hover:text-white">
@@ -96,11 +121,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </h3>
               <ul className="space-y-1">
                 {group.links.map((link) => {
-                  const isActive = pathname === link.href;
+                  const linkUrl = `/${locale}${link.href}`;
+                  const isActive = pathname === linkUrl || pathname === link.href;
                   return (
                     <li key={link.name}>
                       <Link 
-                        href={link.href}
+                        href={linkUrl}
                         className={cn(
                           "flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all group",
                           isActive 
@@ -152,7 +178,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <div className="flex items-center gap-4">
             <Link 
-              href="/admin/articles/create"
+              href={`/${locale}/admin/articles/create`}
               className="hidden sm:flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm"
             >
               <PlusCircle size={16} />

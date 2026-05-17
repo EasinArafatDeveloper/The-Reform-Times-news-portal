@@ -1,4 +1,5 @@
-import { mockArticles } from "@/lib/data";
+import { serializeMongo } from "@/lib/utils";
+import clientPromise from "@/lib/mongodb";
 import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,7 +18,23 @@ export default async function InvestigationsPage({
   const isBangla = locale === 'bn';
   const t = (key: string) => getTranslation(locale, key);
   
-  const investigations = mockArticles.filter(a => a.type === 'investigation' || a.category === 'investigations');
+  const client = await clientPromise;
+  const db = client.db('the-reform-times-news');
+  const rawArticles = await db.collection('articles')
+    .find({ 
+      $or: [
+        { type: 'investigation' },
+        { category: 'investigations' }
+      ],
+      status: 'Published' 
+    })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  const investigations = serializeMongo((rawArticles as any[]).map(a => ({
+    ...a,
+    id: a._id ? a._id.toString() : a.id,
+  })));
   const featured = investigations[0];
   const rest = investigations.slice(1);
 
@@ -46,8 +63,8 @@ export default async function InvestigationsPage({
               return (
                 <Link href={`/${locale}/news/${localizedSlug}`} className="group block relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden">
                   <Image 
-                    src={featured.image} 
-                    alt={localizedTitle}
+                    src={featured.image || featured.mainImage || 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=1200'} 
+                    alt={localizedTitle || 'Featured Image'}
                     fill
                     className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700 group-hover:scale-105"
                   />
@@ -84,8 +101,8 @@ export default async function InvestigationsPage({
               <div key={article.id} className="group flex flex-col gap-4">
                 <Link href={`/${locale}/news/${localizedSlug}`} className="relative w-full aspect-[4/3] overflow-hidden">
                   <Image 
-                    src={article.image} 
-                    alt={localizedTitle}
+                    src={article.image || article.mainImage || 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600'} 
+                    alt={localizedTitle || 'Article Image'}
                     fill
                     className="object-cover opacity-80 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
                   />

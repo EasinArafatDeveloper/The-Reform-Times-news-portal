@@ -29,7 +29,7 @@ export function NewsCard({ article, layout = "vertical", className, imageClassNa
   const slug = getLocalizedContent<string>(article.slug, locale);
   const readTime = getLocalizedContent<string>(article.readTime || "", locale);
 
-  const formattedDate = format(new Date(article.date), isBangla ? 'd MMM, yyyy' : 'MMM d, yyyy', {
+  const formattedDate = format(new Date(article.createdAt || article.publishedAt || article.date || new Date()), isBangla ? 'd MMM, yyyy' : 'MMM d, yyyy', {
     locale: isBangla ? bnLocale : undefined
   });
 
@@ -39,7 +39,7 @@ export function NewsCard({ article, layout = "vertical", className, imageClassNa
       <div className={cn("group flex gap-4 border-b border-border/50 pb-4 last:border-0 last:pb-0 hover:bg-surface/50 p-2 -mx-2 transition-colors rounded-xl", className)}>
         <div className="relative w-20 h-20 shrink-0 overflow-hidden rounded-lg shadow-sm border border-border/50">
           <img 
-            src={article.image} 
+            src={article.image || article.mainImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600'} 
             alt={title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
@@ -73,7 +73,7 @@ export function NewsCard({ article, layout = "vertical", className, imageClassNa
       <div className={cn("group flex flex-col sm:flex-row gap-6 p-4 rounded-2xl border border-transparent hover:border-border hover:bg-card hover:shadow-premium transition-all", className)}>
         <div className={cn("relative w-full sm:w-[40%] aspect-video sm:aspect-[4/3] overflow-hidden rounded-xl shadow-md border border-border/50", imageClassName)}>
           <img 
-            src={article.image} 
+            src={article.image || article.mainImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600'} 
             alt={title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
@@ -115,9 +115,9 @@ export function NewsCard({ article, layout = "vertical", className, imageClassNa
   // Featured layout (for section highlights)
   if (layout === "featured") {
     return (
-      <div className={cn("group relative aspect-[16/9] overflow-hidden rounded-2xl shadow-xl", className)}>
+      <div className={cn("group relative w-full overflow-hidden rounded-2xl shadow-xl", !className?.includes('h-') && "aspect-[16/9]", className)}>
         <img 
-          src={article.image} 
+          src={article.image || article.mainImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600'} 
           alt={title}
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
         />
@@ -146,7 +146,7 @@ export function NewsCard({ article, layout = "vertical", className, imageClassNa
     <div className={cn("group flex flex-col bg-card border border-border/50 rounded-2xl overflow-hidden hover:shadow-premium transition-all news-card-shadow h-full", className)}>
       <div className={cn("relative aspect-[16/10] overflow-hidden", imageClassName)}>
         <img 
-          src={article.image} 
+          src={article.image || article.mainImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600'} 
           alt={title}
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
         />

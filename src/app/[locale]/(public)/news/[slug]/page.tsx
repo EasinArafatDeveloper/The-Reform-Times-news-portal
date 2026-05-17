@@ -1,3 +1,5 @@
+import { serializeMongo } from "@/lib/utils";
+import clientPromise from "@/lib/mongodb";
 import { mockArticles } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
@@ -11,10 +13,34 @@ import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string, locale: string }> }) {
   const { slug, locale } = await params;
-  const article = mockArticles.find(a => {
-    const s = getLocalizedContent<string>(a.slug, 'en');
-    return s === slug || getLocalizedContent<string>(a.slug, 'bn') === slug;
-  });
+  
+  const client = await clientPromise;
+  const db = client.db('the-reform-times-news');
+  
+  const decodedSlug = decodeURIComponent(slug);
+  const encodedSlug = encodeURIComponent(slug);
+
+  let article = await db.collection('articles').findOne({
+    $or: [
+      { 'slug': slug },
+      { 'slug': decodedSlug },
+      { 'slug': encodedSlug },
+      { 'slug.en': slug },
+      { 'slug.bn': slug },
+      { 'slug.en': decodedSlug },
+      { 'slug.bn': decodedSlug },
+      { 'slug.en': encodedSlug },
+      { 'slug.bn': encodedSlug }
+    ]
+  }) as any;
+
+  if (!article) {
+    article = mockArticles.find(a => {
+      const s = getLocalizedContent<string>(a.slug, 'en');
+      const sb = getLocalizedContent<string>(a.slug, 'bn');
+      return s === slug || s === decodedSlug || sb === slug || sb === decodedSlug;
+    });
+  }
   
   if (!article) return { title: 'Article Not Found' };
 
@@ -32,14 +58,39 @@ export default async function NewsDetailsPage({ params }: { params: Promise<{ sl
   const isBangla = locale === 'bn';
   const t = (key: string) => getTranslation(locale, key);
 
-  const article = mockArticles.find(a => {
-    const s = getLocalizedContent<string>(a.slug, 'en');
-    return s === slug || getLocalizedContent<string>(a.slug, 'bn') === slug;
-  });
+  const client = await clientPromise;
+  const db = client.db('the-reform-times-news');
+
+  const decodedSlug = decodeURIComponent(slug);
+  const encodedSlug = encodeURIComponent(slug);
+
+  let article = await db.collection('articles').findOne({
+    $or: [
+      { 'slug': slug },
+      { 'slug': decodedSlug },
+      { 'slug': encodedSlug },
+      { 'slug.en': slug },
+      { 'slug.bn': slug },
+      { 'slug.en': decodedSlug },
+      { 'slug.bn': decodedSlug },
+      { 'slug.en': encodedSlug },
+      { 'slug.bn': encodedSlug }
+    ]
+  }) as any;
+
+  if (!article) {
+    article = mockArticles.find(a => {
+      const s = getLocalizedContent<string>(a.slug, 'en');
+      const sb = getLocalizedContent<string>(a.slug, 'bn');
+      return s === slug || s === decodedSlug || sb === slug || sb === decodedSlug;
+    });
+  }
   
   if (!article) {
     notFound();
   }
+
+  article = serializeMongo(article);
 
   const title = getLocalizedContent<string>(article.title, locale);
   const excerpt = getLocalizedContent<string>(article.excerpt, locale);
@@ -49,14 +100,28 @@ export default async function NewsDetailsPage({ params }: { params: Promise<{ sl
   const authorBio = getLocalizedContent<string>(article.author.bio, locale);
   const readTime = getLocalizedContent<string>(article.readTime || "", locale);
 
-  const formattedDate = format(new Date(article.date), isBangla ? 'd MMMM, yyyy' : 'MMMM d, yyyy', {
+  const formattedDate = format(new Date(article.createdAt || article.publishedAt || article.date || new Date()), isBangla ? 'd MMMM, yyyy' : 'MMMM d, yyyy', {
     locale: isBangla ? bnLocale : undefined
   });
 
-  const relatedArticles = mockArticles.filter(a => 
-    getLocalizedContent<string>(a.category, 'en') === getLocalizedContent<string>(article.category, 'en') && 
-    a.id !== article.id
-  ).slice(0, 3);
+  const dbRelated = await db.collection('articles')
+    .find({
+      category: article.category,
+      _id: { $ne: article._id },
+      status: 'Published'
+    })
+    .limit(3)
+    .toArray();
+
+  const relatedArticles = dbRelated.length > 0
+    ? serializeMongo(dbRelated.map(a => ({
+        ...a,
+        id: a._id ? a._id.toString() : a.id,
+      })))
+    : mockArticles.filter(a => 
+        getLocalizedContent<string>(a.category, 'en') === getLocalizedContent<string>(article.category, 'en') && 
+        a.id !== article.id
+      ).slice(0, 3);
 
   return (
     <div className="bg-background">
@@ -132,23 +197,25 @@ export default async function NewsDetailsPage({ params }: { params: Promise<{ sl
             </article>
 
             {/* Tags */}
-            <div className="flex flex-wrap items-center gap-3 border-t border-border pt-8 mb-16">
-              <span className="font-bold text-sm uppercase tracking-wider text-title">
-                {isBangla ? 'বিষয়বস্তু:' : 'Topics:'}
-              </span>
-              {article.tags.map((tag, i) => {
-                const localizedTag = getLocalizedContent<string>(tag, locale);
-                return (
-                  <Link 
-                    key={i} 
-                    href={`/${locale}/search?q=${encodeURIComponent(localizedTag)}`} 
-                    className="bg-surface text-body px-4 py-1.5 text-sm font-semibold hover:bg-primary hover:text-white transition-colors rounded-sm border border-border"
-                  >
-                    {localizedTag}
-                  </Link>
-                );
-              })}
-            </div>
+            {article.tags && Array.isArray(article.tags) && article.tags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-3 border-t border-border pt-8 mb-16">
+                <span className="font-bold text-sm uppercase tracking-wider text-title">
+                  {isBangla ? 'বিষয়বস্তু:' : 'Topics:'}
+                </span>
+                {article.tags.map((tag: any, i: number) => {
+                  const localizedTag = getLocalizedContent<string>(tag, locale);
+                  return (
+                    <Link 
+                      key={i} 
+                      href={`/${locale}/search?q=${encodeURIComponent(localizedTag)}`} 
+                      className="bg-surface text-body px-4 py-1.5 text-sm font-semibold hover:bg-primary hover:text-white transition-colors rounded-sm border border-border"
+                    >
+                      {localizedTag}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Elegant Author Bio Box */}
             <div className="border-t-4 border-secondary pt-8 flex flex-col sm:flex-row items-center sm:items-start gap-8 mb-8">
@@ -185,7 +252,7 @@ export default async function NewsDetailsPage({ params }: { params: Promise<{ sl
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
               {relatedArticles.map(a => (
-                <NewsCard key={a.id} article={a} locale={locale} />
+                <NewsCard key={a.id} article={a as any} locale={locale} />
               ))}
             </div>
           </div>

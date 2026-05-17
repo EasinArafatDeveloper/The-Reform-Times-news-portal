@@ -1,3 +1,4 @@
+import clientPromise from "@/lib/mongodb";
 import { mockArticles } from "@/lib/data";
 import { fetchRealNews } from "@/lib/api";
 import { ArrowRight } from "lucide-react";
@@ -10,13 +11,24 @@ export async function HeroSection({ locale = 'bn' }: { locale?: string }) {
   const isBangla = locale === 'bn';
   const t = (key: string) => getTranslation(locale, key);
 
-  const realNews = await fetchRealNews();
-  const allArticles = Array.isArray(realNews) && realNews.length > 0 ? realNews : mockArticles;
+  const client = await clientPromise;
+  const db = client.db('the-reform-times-news');
+  const rawArticles = await db.collection('articles')
+    .find({ status: 'Published' })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  const allArticles = rawArticles.length > 0 
+    ? (rawArticles as any[]).map(a => ({
+        ...a,
+        id: a._id ? a._id.toString() : a.id,
+      }))
+    : mockArticles;
   
   // Get multiple featured articles for the slider
   const featuredArticles = allArticles.filter(a => a.featured).slice(0, 5);
   if (featuredArticles.length === 0) {
-    featuredArticles.push(allArticles[0]);
+    featuredArticles.push(...allArticles.slice(0, 5));
   }
   
   const sideArticles = allArticles.filter(a => !featuredArticles.find(f => f.id === a.id)).slice(0, 4);
