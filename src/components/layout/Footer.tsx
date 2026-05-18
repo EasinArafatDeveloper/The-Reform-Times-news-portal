@@ -37,9 +37,9 @@ export function Footer({ locale = 'bn' }: { locale?: string }) {
           <div className="lg:col-span-4 space-y-8">
             <Link href={`/${locale}`} className="inline-block">
               <img 
-                src="/the reform times logo.png" 
+                src="/dark mode logo.png" 
                 alt="The Reform Times" 
-                className="h-10 md:h-12 w-auto object-contain block invert brightness-[2]" 
+                className="h-[75px] md:h-[115px] w-auto object-contain -my-4 block" 
               />
             </Link>
             <p className="text-white/50 text-base leading-relaxed font-medium">
