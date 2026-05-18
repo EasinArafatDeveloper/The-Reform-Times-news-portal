@@ -28,10 +28,40 @@ export default function PhotocardGenerator() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [reporterName, setReporterName] = useState(isBangla ? 'স্টাফ রিপোর্টার' : 'By Staff Reporter');
   const [reporterTitle, setReporterTitle] = useState(isBangla ? 'দ্য রিফর্ম টাইমস' : 'The Reform Times');
-  const [sourceUrl, setSourceUrl] = useState('reformtimes.in');
+  const [reporterAvatar, setReporterAvatar] = useState<string>('');
+  const [sourceUrl, setSourceUrl] = useState('www.thereformtimes.com');
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
   const [accentColor, setAccentColor] = useState('#b91c1c'); // Default red
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Fetch active admin profile settings on mount to auto-populate reporter details
+  useEffect(() => {
+    async function fetchAdminSettings() {
+      try {
+        const res = await fetch('/api/admin/settings');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.name) {
+            setReporterName(data.name);
+          }
+          if (data.role) {
+            const roleText = isBangla 
+              ? (data.role.bn || data.role.en) 
+              : (data.role.en || data.role.bn);
+            if (roleText) {
+              setReporterTitle(roleText);
+            }
+          }
+          if (data.avatar) {
+            setReporterAvatar(data.avatar);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch active admin settings for photocard auto-population:", err);
+      }
+    }
+    fetchAdminSettings();
+  }, [isBangla]);
 
   // Hidden canvas reference
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -331,14 +361,33 @@ export default function PhotocardGenerator() {
       ctx.arc(imgX + 22, footerItemY + 22, 22, 0, 2 * Math.PI);
       ctx.fill();
       
-      // Avatar Icon (Mini user)
-      ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
-      ctx.beginPath();
-      ctx.arc(imgX + 22, footerItemY + 16, 8, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(imgX + 22, footerItemY + 36, 14, Math.PI, 2 * Math.PI);
-      ctx.fill();
+      let drewAvatar = false;
+      if (reporterAvatar) {
+        try {
+          const avatarImg = await loadImage(reporterAvatar);
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(imgX + 22, footerItemY + 22, 22, 0, 2 * Math.PI);
+          ctx.clip();
+          // Draw image centered in the 44x44 square area
+          ctx.drawImage(avatarImg, imgX, footerItemY, 44, 44);
+          ctx.restore();
+          drewAvatar = true;
+        } catch (err) {
+          console.error("Failed to load reporter avatar on canvas, drawing fallback icon", err);
+        }
+      }
+
+      if (!drewAvatar) {
+        // Avatar Icon (Mini user fallback)
+        ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+        ctx.beginPath();
+        ctx.arc(imgX + 22, footerItemY + 16, 8, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(imgX + 22, footerItemY + 36, 14, Math.PI, 2 * Math.PI);
+        ctx.fill();
+      }
 
       // Reporter Text
       const hasReporterBengali = /[৳-৿]/.test(reporterName) || /[৳-৿]/.test(reporterTitle);
@@ -731,7 +780,7 @@ export default function PhotocardGenerator() {
             {/* 2. Top Header Divider */}
             <hr 
               style={{ borderColor: themeMode === 'dark' ? '#1e293b' : '#e2e8f0' }} 
-              className="mt-2.5 mb-2 border-t w-full opacity-80" 
+              className="mt-1.5 mb-1.5 border-t w-full opacity-80" 
             />
 
             {/* 3. Main Body: Photo Wrapper */}
@@ -757,7 +806,7 @@ export default function PhotocardGenerator() {
               {/* Actual Image Render */}
               <div 
                 style={{ borderColor: themeMode === 'dark' ? '#1e293b' : '#e2e8f0' }}
-                className="w-full rounded-md overflow-hidden bg-slate-100 border relative flex items-center justify-center aspect-[16/8] shrink-0"
+                className="w-full rounded-md overflow-hidden bg-slate-100 border relative flex items-center justify-center aspect-[16/6] shrink-0"
               >
                 {imageSrc ? (
                   <img 
@@ -775,7 +824,7 @@ export default function PhotocardGenerator() {
             </div>
 
             {/* 4. Category Tag & Accent horizontal line */}
-            <div className="flex items-center shrink-0 mt-2 mb-1.5">
+            <div className="flex items-center shrink-0 mt-1.5 mb-1">
               <span className="bg-slate-950 text-white text-[7px] font-black uppercase tracking-wider px-2 py-0.5 rounded-sm">
                 {category}
               </span>
@@ -786,11 +835,11 @@ export default function PhotocardGenerator() {
             </div>
 
             {/* 5. Title & Vertical Red bar */}
-            <div className="flex items-start gap-3 w-full shrink-0 min-h-[75px] overflow-hidden">
+            <div className="flex items-start gap-3 w-full shrink-0 min-h-[60px] overflow-hidden">
               {/* Left red thick bar */}
               <div 
                 style={{ backgroundColor: accentColor }}
-                className="w-[3px] h-[65px] shrink-0 self-stretch rounded-sm"
+                className="w-[3px] h-[55px] shrink-0 self-stretch rounded-sm"
               />
 
               {/* Title Text and Summary details */}
@@ -827,8 +876,16 @@ export default function PhotocardGenerator() {
               <div className="flex items-center gap-3.5">
                 {/* Reporter Info */}
                 <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${themeMode === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                    <User size={14} className={themeMode === 'dark' ? 'text-slate-400' : 'text-slate-500'} />
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${themeMode === 'dark' ? 'bg-slate-800' : 'bg-slate-100'} overflow-hidden relative`}>
+                    {reporterAvatar ? (
+                      <img 
+                        src={reporterAvatar} 
+                        alt={reporterName} 
+                        className="w-full h-full object-cover animate-fade-in"
+                      />
+                    ) : (
+                      <User size={14} className={themeMode === 'dark' ? 'text-slate-400' : 'text-slate-500'} />
+                    )}
                   </div>
                   <div className="flex flex-col items-start leading-none text-left">
                     <span className={`text-[8.5px] font-extrabold ${/[৳-৿]/.test(reporterName) ? 'font-bengali-sans' : ''} ${themeMode === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>
