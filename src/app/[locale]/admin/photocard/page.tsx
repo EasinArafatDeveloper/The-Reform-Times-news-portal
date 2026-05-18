@@ -383,22 +383,25 @@ export default function PhotocardGenerator() {
       ctx.font = "bold 16px sans-serif";
       ctx.fillText(sourceUrl, globeX + 55, footerItemY + 28);
 
-      // Right: TRT Logo Badge block
-      const trtW = 90;
-      const trtH = 60;
+      // Right: TRT Logo Badge block (renders favicon icon instead of text with transparent bg)
+      const trtW = 84;
+      const trtH = 84;
       const trtX = 1030 - trtW;
-      const trtY = footerItemY - 10;
+      const trtY = footerItemY - 20; // Aligned centered with square layout
       
-      // Maroon Box
-      ctx.fillStyle = '#7f1d1d';
-      ctx.fillRect(trtX, trtY, trtW, trtH);
-      
-      // TRT Text
-      ctx.fillStyle = '#ffffff';
-      ctx.font = "bold 28px Georgia, serif";
-      ctx.textAlign = 'center';
-      ctx.fillText("TRT", trtX + trtW / 2, trtY + 18);
-      ctx.textAlign = 'left'; // Reset
+      try {
+        const logoImg = await loadImage('/favicon.ico');
+        // Render logo icon directly with transparent background and larger size
+        ctx.drawImage(logoImg, trtX, trtY, trtW, trtH);
+      } catch (err) {
+        console.error("Failed to load footer logo on canvas, falling back to text", err);
+        // Fallback TRT Text
+        ctx.fillStyle = accentColor;
+        ctx.font = "bold 28px Georgia, serif";
+        ctx.textAlign = 'center';
+        ctx.fillText("TRT", trtX + trtW / 2, trtY + 30);
+        ctx.textAlign = 'left'; // Reset
+      }
 
       // 17. Trigger client download of the image
       const dataUrl = canvas.toDataURL('image/png');
@@ -857,9 +860,21 @@ export default function PhotocardGenerator() {
                 </div>
               </div>
 
-              {/* Brand block badge */}
-              <div className="w-[45px] h-[30px] bg-red-900 flex items-center justify-center rounded-sm shadow-sm select-none">
-                <span className="text-white font-serif font-black text-xs tracking-wider">TRT</span>
+              {/* Brand block badge (displays transparent square favicon icon) */}
+              <div className="w-[42px] h-[42px] flex items-center justify-center select-none overflow-hidden relative shrink-0">
+                <img 
+                  src="/favicon.ico" 
+                  alt="TRT Logo Icon" 
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                    const fallback = (e.target as HTMLElement).nextElementSibling as HTMLElement;
+                    if (fallback) fallback.style.display = 'block';
+                  }}
+                />
+                <span style={{ display: 'none' }} className="text-primary font-serif font-black text-xs tracking-wider absolute inset-0 flex items-center justify-center">
+                  TRT
+                </span>
               </div>
             </div>
           </div>
