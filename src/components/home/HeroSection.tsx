@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getTranslation } from "@/lib/i18n-utils";
 import HeroSlider from "./HeroSlider";
 import { NewsCard } from "@/components/shared/NewsCard";
+import { serializeMongo } from "@/lib/utils";
 
 export async function HeroSection({ locale = 'bn' }: { locale?: string }) {
   const isBangla = locale === 'bn';
@@ -19,10 +20,10 @@ export async function HeroSection({ locale = 'bn' }: { locale?: string }) {
     .toArray();
 
   const allArticles = rawArticles.length > 0 
-    ? (rawArticles as any[]).map(a => ({
+    ? serializeMongo((rawArticles as any[]).map(a => ({
         ...a,
         id: a._id ? a._id.toString() : a.id,
-      }))
+      })))
     : mockArticles;
   
   // Get multiple featured articles for the slider
