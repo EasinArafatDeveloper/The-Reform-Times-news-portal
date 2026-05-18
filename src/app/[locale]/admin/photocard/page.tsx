@@ -29,6 +29,7 @@ export default function PhotocardGenerator() {
   const [reporterName, setReporterName] = useState(isBangla ? 'স্টাফ রিপোর্টার' : 'By Staff Reporter');
   const [reporterTitle, setReporterTitle] = useState(isBangla ? 'দ্য রিফর্ম টাইমস' : 'The Reform Times');
   const [reporterAvatar, setReporterAvatar] = useState<string>('');
+  const [reporterDisplayMode, setReporterDisplayMode] = useState<'profile' | 'generic' | 'hidden'>('profile');
   const [sourceUrl, setSourceUrl] = useState('www.thereformtimes.com');
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
   const [accentColor, setAccentColor] = useState('#b91c1c'); // Default red
@@ -62,6 +63,19 @@ export default function PhotocardGenerator() {
     }
     fetchAdminSettings();
   }, [isBangla]);
+
+  // Computed values based on display mode
+  const drawReporterName = reporterDisplayMode === 'profile' 
+    ? reporterName 
+    : (isBangla ? 'স্টাফ রিপোর্টার' : 'By Staff Reporter');
+
+  const drawReporterTitle = reporterDisplayMode === 'profile' 
+    ? reporterTitle 
+    : (isBangla ? 'দ্য রিফর্ম টাইমস' : 'The Reform Times');
+
+  const drawReporterAvatar = reporterDisplayMode === 'profile' 
+    ? reporterAvatar 
+    : '';
 
   // Hidden canvas reference
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -353,62 +367,65 @@ export default function PhotocardGenerator() {
 
       // 16. Draw Footer Contents (Reporter / Source / Logo TRT)
       const footerItemY = 970;
+      const showReporter = reporterDisplayMode !== 'hidden';
 
-      // Left: Reporter Avatar and Info
-      // Avatar Bubble background
-      ctx.fillStyle = isDark ? '#1e293b' : '#f1f5f9';
-      ctx.beginPath();
-      ctx.arc(imgX + 22, footerItemY + 22, 22, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      let drewAvatar = false;
-      if (reporterAvatar) {
-        try {
-          const avatarImg = await loadImage(reporterAvatar);
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(imgX + 22, footerItemY + 22, 22, 0, 2 * Math.PI);
-          ctx.clip();
-          // Draw image centered in the 44x44 square area
-          ctx.drawImage(avatarImg, imgX, footerItemY, 44, 44);
-          ctx.restore();
-          drewAvatar = true;
-        } catch (err) {
-          console.error("Failed to load reporter avatar on canvas, drawing fallback icon", err);
+      if (showReporter) {
+        // Left: Reporter Avatar and Info
+        // Avatar Bubble background
+        ctx.fillStyle = isDark ? '#1e293b' : '#f1f5f9';
+        ctx.beginPath();
+        ctx.arc(imgX + 22, footerItemY + 22, 22, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        let drewAvatar = false;
+        if (drawReporterAvatar) {
+          try {
+            const avatarImg = await loadImage(drawReporterAvatar);
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(imgX + 22, footerItemY + 22, 22, 0, 2 * Math.PI);
+            ctx.clip();
+            // Draw image centered in the 44x44 square area
+            ctx.drawImage(avatarImg, imgX, footerItemY, 44, 44);
+            ctx.restore();
+            drewAvatar = true;
+          } catch (err) {
+            console.error("Failed to load reporter avatar on canvas, drawing fallback icon", err);
+          }
         }
+
+        if (!drewAvatar) {
+          // Avatar Icon (Mini user fallback)
+          ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+          ctx.beginPath();
+          ctx.arc(imgX + 22, footerItemY + 16, 8, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(imgX + 22, footerItemY + 36, 14, Math.PI, 2 * Math.PI);
+          ctx.fill();
+        }
+
+        // Reporter Text
+        const hasReporterBengali = /[৳-৿]/.test(drawReporterName) || /[৳-৿]/.test(drawReporterTitle);
+        const reporterFontFamily = hasReporterBengali ? "'Hind Siliguri', sans-serif" : "sans-serif";
+
+        ctx.fillStyle = isDark ? '#ffffff' : '#0b0f19';
+        ctx.font = `bold 16px ${reporterFontFamily}`;
+        ctx.textBaseline = 'top';
+        ctx.fillText(drawReporterName, imgX + 60, footerItemY + 6);
+        
+        ctx.fillStyle = isDark ? '#64748b' : '#94a3b8';
+        ctx.font = `500 14px ${reporterFontFamily}`;
+        ctx.fillText(drawReporterTitle, imgX + 60, footerItemY + 28);
+
+        // Draw Separator line in footer
+        ctx.fillStyle = isDark ? '#1e293b' : '#e2e8f0';
+        ctx.fillRect(imgX + 300, footerItemY, 2, 44);
       }
-
-      if (!drewAvatar) {
-        // Avatar Icon (Mini user fallback)
-        ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
-        ctx.beginPath();
-        ctx.arc(imgX + 22, footerItemY + 16, 8, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(imgX + 22, footerItemY + 36, 14, Math.PI, 2 * Math.PI);
-        ctx.fill();
-      }
-
-      // Reporter Text
-      const hasReporterBengali = /[৳-৿]/.test(reporterName) || /[৳-৿]/.test(reporterTitle);
-      const reporterFontFamily = hasReporterBengali ? "'Hind Siliguri', sans-serif" : "sans-serif";
-
-      ctx.fillStyle = isDark ? '#ffffff' : '#0b0f19';
-      ctx.font = `bold 16px ${reporterFontFamily}`;
-      ctx.textBaseline = 'top';
-      ctx.fillText(reporterName, imgX + 60, footerItemY + 6);
-      
-      ctx.fillStyle = isDark ? '#64748b' : '#94a3b8';
-      ctx.font = `500 14px ${reporterFontFamily}`;
-      ctx.fillText(reporterTitle, imgX + 60, footerItemY + 28);
-
-      // Draw Separator line in footer
-      ctx.fillStyle = isDark ? '#1e293b' : '#e2e8f0';
-      ctx.fillRect(imgX + 300, footerItemY, 2, 44);
 
       // Center: Source Icon and Info
-      // Globe icon sphere
-      const globeX = imgX + 340;
+      // Globe icon sphere (dynamically left-aligned if reporter block is hidden!)
+      const globeX = showReporter ? (imgX + 340) : imgX;
       ctx.strokeStyle = isDark ? '#64748b' : '#94a3b8';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
@@ -673,6 +690,35 @@ export default function PhotocardGenerator() {
               {isBangla ? 'ফুটার বা ব্র্যান্ড কাস্টমাইজেশন' : 'Footer & Brand Info'}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-caption mb-2">
+                  {isBangla ? 'রিপোর্টার প্রদর্শন অপশন' : 'Reporter Display Option'}
+                </label>
+                <div className="flex rounded-lg overflow-hidden border border-border">
+                  <button
+                    type="button"
+                    onClick={() => setReporterDisplayMode('profile')}
+                    className={`flex-1 py-2 text-[10px] font-black tracking-wider uppercase transition-all ${reporterDisplayMode === 'profile' ? 'bg-primary text-white' : 'bg-surface text-caption hover:text-body'}`}
+                  >
+                    {isBangla ? 'প্রোফাইল ছবি সহ' : 'Profile (Photo)'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReporterDisplayMode('generic')}
+                    className={`flex-1 py-2 text-[10px] font-black tracking-wider uppercase transition-all ${reporterDisplayMode === 'generic' ? 'bg-primary text-white' : 'bg-surface text-caption hover:text-body'}`}
+                  >
+                    {isBangla ? 'সাধারণ আইকন' : 'Generic Icon'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReporterDisplayMode('hidden')}
+                    className={`flex-1 py-2 text-[10px] font-black tracking-wider uppercase transition-all ${reporterDisplayMode === 'hidden' ? 'bg-primary text-white' : 'bg-surface text-caption hover:text-body'}`}
+                  >
+                    {isBangla ? 'হাইড করুন' : 'Hide Reporter'}
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-caption mb-2">
                   {isBangla ? 'রিপোর্টার নাম' : 'Reporter Name'}
@@ -680,8 +726,9 @@ export default function PhotocardGenerator() {
                 <input
                   type="text"
                   value={reporterName}
+                  disabled={reporterDisplayMode === 'hidden'}
                   onChange={(e) => setReporterName(e.target.value)}
-                  className="w-full bg-surface border border-border rounded-xl px-3 py-2 outline-none focus:border-primary text-xs font-bold"
+                  className="w-full bg-surface border border-border rounded-xl px-3 py-2 outline-none focus:border-primary text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
@@ -691,8 +738,9 @@ export default function PhotocardGenerator() {
                 <input
                   type="text"
                   value={reporterTitle}
+                  disabled={reporterDisplayMode === 'hidden'}
                   onChange={(e) => setReporterTitle(e.target.value)}
-                  className="w-full bg-surface border border-border rounded-xl px-3 py-2 outline-none focus:border-primary text-xs font-bold"
+                  className="w-full bg-surface border border-border rounded-xl px-3 py-2 outline-none focus:border-primary text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
               <div className="md:col-span-2">
@@ -874,34 +922,38 @@ export default function PhotocardGenerator() {
             <div className="flex justify-between items-center shrink-0">
               {/* Left & Center elements grouped together for perfect spacing and alignment */}
               <div className="flex items-center gap-3.5">
-                {/* Reporter Info */}
-                <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${themeMode === 'dark' ? 'bg-slate-800' : 'bg-slate-100'} overflow-hidden relative`}>
-                    {reporterAvatar ? (
-                      <img 
-                        src={reporterAvatar} 
-                        alt={reporterName} 
-                        className="w-full h-full object-cover animate-fade-in"
-                      />
-                    ) : (
-                      <User size={14} className={themeMode === 'dark' ? 'text-slate-400' : 'text-slate-500'} />
-                    )}
-                  </div>
-                  <div className="flex flex-col items-start leading-none text-left">
-                    <span className={`text-[8.5px] font-extrabold ${/[৳-৿]/.test(reporterName) ? 'font-bengali-sans' : ''} ${themeMode === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>
-                      {reporterName}
-                    </span>
-                    <span className={`text-[7.5px] font-bold text-slate-400 tracking-wide mt-0.5 ${/[৳-৿]/.test(reporterTitle) ? 'font-bengali-sans' : ''}`}>
-                      {reporterTitle}
-                    </span>
-                  </div>
-                </div>
+                {/* Reporter Info (rendered conditionally based on display mode) */}
+                {reporterDisplayMode !== 'hidden' && (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${themeMode === 'dark' ? 'bg-slate-800' : 'bg-slate-100'} overflow-hidden relative`}>
+                        {drawReporterAvatar ? (
+                          <img 
+                            src={drawReporterAvatar} 
+                            alt={drawReporterName} 
+                            className="w-full h-full object-cover animate-fade-in"
+                          />
+                        ) : (
+                          <User size={14} className={themeMode === 'dark' ? 'text-slate-400' : 'text-slate-500'} />
+                        )}
+                      </div>
+                      <div className="flex flex-col items-start leading-none text-left">
+                        <span className={`text-[8.5px] font-extrabold ${/[৳-৿]/.test(drawReporterName) ? 'font-bengali-sans' : ''} ${themeMode === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>
+                          {drawReporterName}
+                        </span>
+                        <span className={`text-[7.5px] font-bold text-slate-400 tracking-wide mt-0.5 ${/[৳-৿]/.test(drawReporterTitle) ? 'font-bengali-sans' : ''}`}>
+                          {drawReporterTitle}
+                        </span>
+                      </div>
+                    </div>
 
-                {/* Vertical small divider */}
-                <div 
-                  style={{ backgroundColor: themeMode === 'dark' ? '#1e293b' : '#e2e8f0' }}
-                  className="w-[1px] h-6"
-                />
+                    {/* Vertical small divider */}
+                    <div 
+                      style={{ backgroundColor: themeMode === 'dark' ? '#1e293b' : '#e2e8f0' }}
+                      className="w-[1px] h-6"
+                    />
+                  </>
+                )}
 
                 {/* Source Info */}
                 <div className="flex items-center gap-2">
