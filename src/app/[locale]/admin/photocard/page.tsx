@@ -30,10 +30,33 @@ export default function PhotocardGenerator() {
   const [reporterTitle, setReporterTitle] = useState(isBangla ? 'দ্য রিফর্ম টাইমস' : 'The Reform Times');
   const [reporterAvatar, setReporterAvatar] = useState<string>('');
   const [reporterDisplayMode, setReporterDisplayMode] = useState<'profile' | 'generic' | 'hidden'>('profile');
+  const [cardLanguage, setCardLanguage] = useState<'bn' | 'en'>(isBangla ? 'bn' : 'en');
   const [sourceUrl, setSourceUrl] = useState('www.thereformtimes.com');
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
   const [accentColor, setAccentColor] = useState('#b91c1c'); // Default red
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const isCardBangla = cardLanguage === 'bn';
+
+  // Sync default placeholder texts when card language toggles
+  useEffect(() => {
+    const defaultBnHeadline = 'এখানে আপনার শক্তিশালী শিরোনামটি দুই বা তিন লাইনে লিখুন';
+    const defaultEnHeadline = 'Your Powerful Headline Goes Here in Two or Three Lines';
+    const defaultBnSummary = 'খবরের সংক্ষিপ্ত বিবরণ বা মূল বক্তব্য এখানে থাকবে। এটি সংক্ষিপ্ত, স্পষ্ট এবং প্রভাবশালী রাখুন।';
+    const defaultEnSummary = 'Brief summary or key highlight of the news goes here. Keep it short, clear, and impactful.';
+    const defaultBnCategory = 'রাজনীতি';
+    const defaultEnCategory = 'POLITICS';
+
+    if (cardLanguage === 'en') {
+      if (headline === defaultBnHeadline) setHeadline(defaultEnHeadline);
+      if (summary === defaultBnSummary) setSummary(defaultEnSummary);
+      if (category === defaultBnCategory) setCategory(defaultEnCategory);
+    } else {
+      if (headline === defaultEnHeadline) setHeadline(defaultBnHeadline);
+      if (summary === defaultEnSummary) setSummary(defaultBnSummary);
+      if (category === defaultEnCategory) setCategory(defaultBnCategory);
+    }
+  }, [cardLanguage]);
 
   // Fetch active admin profile settings on mount to auto-populate reporter details
   useEffect(() => {
@@ -46,7 +69,7 @@ export default function PhotocardGenerator() {
             setReporterName(data.name);
           }
           if (data.role) {
-            const roleText = isBangla 
+            const roleText = isCardBangla 
               ? (data.role.bn || data.role.en) 
               : (data.role.en || data.role.bn);
             if (roleText) {
@@ -62,16 +85,16 @@ export default function PhotocardGenerator() {
       }
     }
     fetchAdminSettings();
-  }, [isBangla]);
+  }, [cardLanguage]);
 
   // Computed values based on display mode
   const drawReporterName = reporterDisplayMode === 'profile' 
     ? reporterName 
-    : (isBangla ? 'স্টাফ রিপোর্টার' : 'By Staff Reporter');
+    : (isCardBangla ? 'স্টাফ রিপোর্টার' : 'By Staff Reporter');
 
   const drawReporterTitle = reporterDisplayMode === 'profile' 
     ? reporterTitle 
-    : (isBangla ? 'দ্য রিফর্ম টাইমস' : 'The Reform Times');
+    : (isCardBangla ? 'দ্য রিফর্ম টাইমস' : 'The Reform Times');
 
   const drawReporterAvatar = reporterDisplayMode === 'profile' 
     ? reporterAvatar 
@@ -518,8 +541,30 @@ export default function PhotocardGenerator() {
             </h2>
           </div>
 
-          {/* Theme Mode and Color Theme */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Language, Theme Mode and Color Theme */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-caption mb-2">
+                {isBangla ? 'কার্ডের ভাষা' : 'Card Language'}
+              </label>
+              <div className="flex rounded-lg overflow-hidden border border-border">
+                <button
+                  type="button"
+                  onClick={() => setCardLanguage('bn')}
+                  className={`flex-1 py-2 text-xs font-bold transition-all ${cardLanguage === 'bn' ? 'bg-primary text-white' : 'bg-surface text-caption hover:text-body'}`}
+                >
+                  বাংলা
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCardLanguage('en')}
+                  className={`flex-1 py-2 text-xs font-bold transition-all ${cardLanguage === 'en' ? 'bg-primary text-white' : 'bg-surface text-caption hover:text-body'}`}
+                >
+                  English
+                </button>
+              </div>
+            </div>
+
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-caption mb-2">
                 {isBangla ? 'কার্ডের থিম' : 'Card Theme'}
@@ -530,14 +575,14 @@ export default function PhotocardGenerator() {
                   onClick={() => setThemeMode('light')}
                   className={`flex-1 py-2 text-xs font-bold transition-all ${themeMode === 'light' ? 'bg-primary text-white' : 'bg-surface text-caption hover:text-body'}`}
                 >
-                  {isBangla ? 'লাইট (সাদা)' : 'Light (White)'}
+                  {isBangla ? 'লাইট' : 'Light'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setThemeMode('dark')}
                   className={`flex-1 py-2 text-xs font-bold transition-all ${themeMode === 'dark' ? 'bg-primary text-white' : 'bg-surface text-caption hover:text-body'}`}
                 >
-                  {isBangla ? 'ডার্ক (কালো)' : 'Dark (Black)'}
+                  {isBangla ? 'ডার্ক' : 'Dark'}
                 </button>
               </div>
             </div>
