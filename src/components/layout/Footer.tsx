@@ -36,9 +36,11 @@ export function Footer({ locale = 'bn' }: { locale?: string }) {
           {/* Brand Column */}
           <div className="lg:col-span-4 space-y-8">
             <Link href={`/${locale}`} className="inline-block">
-              <span className="font-serif font-bold text-4xl tracking-tight text-white block">
-                The Reform <span className="text-primary">Times</span>
-              </span>
+              <img 
+                src="/the reform times logo.png" 
+                alt="The Reform Times" 
+                className="h-10 md:h-12 w-auto object-contain block invert brightness-[2]" 
+              />
             </Link>
             <p className="text-white/50 text-base leading-relaxed font-medium">
               {isBangla 

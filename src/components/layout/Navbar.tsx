@@ -63,10 +63,12 @@ export function Navbar() {
     >
       <div className="container relative flex items-center justify-between">
         {/* Logo */}
-        <Link href={`/${locale}`} className={cn("flex items-center gap-2 transition-opacity", isSearchOpen && "opacity-0 invisible lg:visible")}>
-          <span className="font-serif font-bold text-2xl tracking-tight text-title">
-            The Reform Times
-          </span>
+        <Link href={`/${locale}`} className={cn("flex items-center gap-2 transition-opacity shrink-0 py-1", isSearchOpen && "opacity-0 invisible lg:visible")}>
+          <img 
+            src="/the reform times logo.png" 
+            alt="The Reform Times" 
+            className="h-10 sm:h-11 md:h-12 w-auto object-contain block dark:invert" 
+          />
         </Link>
 
         {/* Desktop Navigation */}

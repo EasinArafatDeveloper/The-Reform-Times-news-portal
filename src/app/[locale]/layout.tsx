@@ -10,6 +10,11 @@ const hindSiliguri = Hind_Siliguri({ subsets: ['bengali'], weight: ['400', '600'
 export const metadata: Metadata = {
   title: "The Reform Times | Advocacy Journalism",
   description: "Investigative journalism, human rights storytelling, and reform-focused reporting.",
+  icons: {
+    icon: '/logo icon 1 .png',
+    shortcut: '/logo icon 1 .png',
+    apple: '/logo icon 1 .png',
+  }
 };
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
