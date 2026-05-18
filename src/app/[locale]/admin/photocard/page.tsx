@@ -134,9 +134,9 @@ export default function PhotocardGenerator() {
         const logoPath = isDark ? '/dark mode logo.png' : '/the reform times logo.png';
         const logo = await loadImage(logoPath);
         // Draw logo nicely on top-left
-        const logoHeight = 95;
+        const logoHeight = 125;
         const logoWidth = logo.width * (logoHeight / logo.height);
-        ctx.drawImage(logo, 50, 35, logoWidth, logoHeight);
+        ctx.drawImage(logo, 50, 20, logoWidth, logoHeight);
       } catch (err) {
         console.error("Failed to load header logo on canvas, falling back to text representation", err);
         ctx.fillStyle = isDark ? '#ffffff' : '#0b0f19';
@@ -264,12 +264,17 @@ export default function PhotocardGenerator() {
       const catY = 660;
       const catHeight = 32;
       ctx.fillStyle = '#0f172a'; // Navy Blue block
-      ctx.font = "bold 13px sans-serif";
+      
+      const hasCatBengali = /[৳-৿]/.test(category);
+      const catFontFamily = hasCatBengali ? "'Hind Siliguri', sans-serif" : "sans-serif";
+      ctx.font = `bold 13px ${catFontFamily}`;
+      
       const catText = category.toUpperCase();
       const catWidth = ctx.measureText(catText).width + 24;
       ctx.fillRect(imgX, catY, catWidth, catHeight);
       ctx.fillStyle = '#ffffff';
-      ctx.fillText(catText, imgX + 12, catY + 21);
+      ctx.textBaseline = 'top';
+      ctx.fillText(catText, imgX + 12, catY + (catHeight - 13) / 2);
 
       // 11. Draw Category Accent line below category badge
       ctx.fillStyle = isDark ? '#1e293b' : '#e2e8f0';
@@ -336,12 +341,16 @@ export default function PhotocardGenerator() {
       ctx.fill();
 
       // Reporter Text
+      const hasReporterBengali = /[৳-৿]/.test(reporterName) || /[৳-৿]/.test(reporterTitle);
+      const reporterFontFamily = hasReporterBengali ? "'Hind Siliguri', sans-serif" : "sans-serif";
+
       ctx.fillStyle = isDark ? '#ffffff' : '#0b0f19';
-      ctx.font = "bold 16px sans-serif";
+      ctx.font = `bold 16px ${reporterFontFamily}`;
+      ctx.textBaseline = 'top';
       ctx.fillText(reporterName, imgX + 60, footerItemY + 6);
       
       ctx.fillStyle = isDark ? '#64748b' : '#94a3b8';
-      ctx.font = "500 14px sans-serif";
+      ctx.font = `500 14px ${reporterFontFamily}`;
       ctx.fillText(reporterTitle, imgX + 60, footerItemY + 28);
 
       // Draw Separator line in footer
@@ -677,7 +686,7 @@ export default function PhotocardGenerator() {
                 <img 
                   src={themeMode === 'dark' ? "/dark mode logo.png" : "/the reform times logo.png"} 
                   alt="The Reform Times Logo"
-                  className="h-[45px] w-auto object-contain"
+                  className="h-[58px] w-auto object-contain"
                   onError={(e) => {
                     // Fallback to text logo if image loading fails locally
                     (e.target as HTMLElement).style.display = 'none';
