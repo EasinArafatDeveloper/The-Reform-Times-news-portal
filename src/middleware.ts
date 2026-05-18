@@ -22,6 +22,26 @@ export function middleware(request: NextRequest) {
       );
     }
   }
+
+  // Admin route security check
+  const localeMatch = pathname.match(/^\/([a-z]{2})(\/|$)/);
+  const locale = localeMatch ? localeMatch[1] : i18n.defaultLocale;
+  const isAdminRoute = pathname.match(/^\/[a-z]{2}\/admin(\/|$)/);
+  const isLoginRoute = pathname.match(/^\/[a-z]{2}\/admin\/login(\/|$)/);
+
+  if (isAdminRoute) {
+    const isAuthenticated = request.cookies.has('admin_session');
+
+    if (!isAuthenticated && !isLoginRoute) {
+      // Redirect unauthenticated user to login page
+      return NextResponse.redirect(new URL(`/${locale}/admin/login`, request.url));
+    }
+
+    if (isAuthenticated && isLoginRoute) {
+      // Redirect already authenticated user to dashboard
+      return NextResponse.redirect(new URL(`/${locale}/admin/dashboard`, request.url));
+    }
+  }
 }
 
 export const config = {

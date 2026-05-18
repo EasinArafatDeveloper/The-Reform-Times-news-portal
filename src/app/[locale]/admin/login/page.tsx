@@ -14,20 +14,46 @@ import { useRouter, useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const params = useParams();
   const locale = params?.locale as string || 'bn';
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate login
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: usernameOrEmail,
+          password: password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Invalid credentials. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Successful login - Next.js middleware will now allow access
       router.push(`/${locale}/admin/dashboard`);
-    }, 1500);
+      router.refresh(); // Refresh router to update middleware state
+    } catch (err: any) {
+      setError('A connection error occurred. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -44,7 +70,7 @@ export default function LoginPage() {
         </Link>
 
         <div className="bg-card rounded-[32px] shadow-2xl border border-border p-10 md:p-12">
-          <div className="flex flex-col items-center text-center mb-10">
+          <div className="flex flex-col items-center text-center mb-8">
             <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center text-white mb-6 shadow-xl shadow-secondary/20">
               <ShieldCheck size={32} />
             </div>
@@ -52,19 +78,26 @@ export default function LoginPage() {
             <p className="text-caption text-sm font-medium">Access the control center of The Reform Times.</p>
           </div>
 
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-4 flex items-start gap-3 mb-6 text-destructive">
+              <AlertCircle size={18} className="shrink-0 mt-0.5" />
+              <p className="text-xs font-bold leading-normal">{error}</p>
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-caption uppercase tracking-widest ml-1">Work Email</label>
+              <label className="text-xs font-bold text-caption uppercase tracking-widest ml-1">Username or Email</label>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-caption group-focus-within:text-primary transition-colors">
                   <Mail size={18} />
                 </div>
                 <input 
-                  type="email" 
+                  type="text" 
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@reformtimes.com"
+                  value={usernameOrEmail}
+                  onChange={(e) => setUsernameOrEmail(e.target.value)}
+                  placeholder="admin or name@reformtimes.com"
                   className="w-full bg-surface border border-border rounded-2xl py-4 pl-12 pr-4 outline-none focus:bg-card focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all font-medium text-title"
                 />
               </div>

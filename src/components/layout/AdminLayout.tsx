@@ -93,6 +93,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const segments = pathname.split('/');
   const locale = i18n.locales.includes(segments[1] as any) ? segments[1] : i18n.defaultLocale;
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+      window.location.href = `/${locale}/admin/login`;
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
+  };
+
   // Hide sidebar on login page
   if (pathname === `/${locale}/admin/login` || pathname === '/admin/login') return <>{children}</>;
 
@@ -157,7 +166,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/20 border-t border-white/10">
-          <button className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-white/60 hover:text-white transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-white/60 hover:text-white transition-colors"
+          >
             <LogOut size={18} />
             <span className={cn(!isSidebarOpen && "lg:hidden")}>Logout</span>
           </button>
