@@ -67,7 +67,7 @@ export default function HeroSlider({ articles, locale }: HeroSliderProps) {
   };
 
   return (
-    <div className="relative w-full aspect-[16/9] md:aspect-[16/8.5] overflow-hidden rounded-[2rem] shadow-premium border border-border/50 group">
+    <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] md:aspect-[16/8.5] overflow-hidden rounded-[2rem] shadow-premium border border-border/50 group">
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={currentIndex}
@@ -93,12 +93,12 @@ export default function HeroSlider({ articles, locale }: HeroSliderProps) {
             {/* Cinematic Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
             
-            <div className="absolute bottom-0 left-0 p-6 md:p-12 md:w-11/12 lg:w-10/12 xl:w-9/12 z-20">
+            <div className="absolute bottom-0 left-0 p-4 sm:p-8 md:p-12 md:w-11/12 lg:w-10/12 xl:w-9/12 z-20">
               <motion.div 
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="flex items-center gap-3 mb-4"
+                className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4"
               >
                 <span className="bg-primary text-white text-[10px] md:text-[11px] font-black uppercase px-3 py-1 tracking-[0.2em] rounded-sm shadow-lg">
                   {isBangla ? "ফিচারড স্টোরি" : "Featured Story"}
@@ -111,7 +111,7 @@ export default function HeroSlider({ articles, locale }: HeroSliderProps) {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="font-serif font-bold text-2xl md:text-3xl lg:text-4xl xl:text-5xl leading-[1.1] mb-4 text-white hover:text-primary transition-colors duration-500 line-clamp-3 md:line-clamp-2 max-w-4xl"
+                  className="font-serif font-bold text-base sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl leading-[1.1] mb-2 sm:mb-4 text-white hover:text-primary transition-colors duration-500 line-clamp-3 md:line-clamp-2 max-w-4xl"
                 >
                   {title}
                 </motion.h1>
@@ -121,7 +121,7 @@ export default function HeroSlider({ articles, locale }: HeroSliderProps) {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-white/80 text-sm md:text-base lg:text-lg line-clamp-2 mb-8 max-w-3xl leading-relaxed font-sans"
+                className="hidden sm:block text-white/80 text-xs sm:text-sm md:text-base lg:text-lg line-clamp-2 mb-4 sm:mb-8 max-w-3xl leading-relaxed font-sans"
               >
                 {excerpt}
               </motion.p>
@@ -130,10 +130,10 @@ export default function HeroSlider({ articles, locale }: HeroSliderProps) {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="flex items-center gap-6 text-xs font-bold uppercase tracking-widest text-white/60 border-t border-white/10 pt-6"
+                className="flex items-center gap-3 sm:gap-6 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/60 border-t border-white/10 pt-3 sm:pt-6"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/50 p-0.5">
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-primary/50 p-0.5">
                     <img src={currentArticle.author.avatar} alt={currentArticle.author.name} className="w-full h-full object-cover rounded-full" />
                   </div>
                   <span className="text-white tracking-normal">{currentArticle.author.name}</span>
@@ -169,7 +169,7 @@ export default function HeroSlider({ articles, locale }: HeroSliderProps) {
       </div>
 
       {/* Pagination Dots */}
-      <div className="absolute bottom-6 right-12 z-30 flex gap-2">
+      <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-12 z-30 flex gap-2">
         {articles.map((_, i) => (
           <button
             key={i}

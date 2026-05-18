@@ -125,7 +125,7 @@ export function NewsCard({ article, layout = "vertical", className, imageClassNa
         <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full text-white">
           <CategoryBadge category={category} className="text-primary mb-3" />
           <Link href={`/${locale}/news/${slug}`}>
-            <h2 className="font-serif font-bold text-2xl md:text-4xl leading-tight mb-4 group-hover:text-primary/90 transition-colors">
+            <h2 className="!text-white font-serif font-bold text-2xl md:text-4xl leading-tight mb-4 group-hover:!text-primary/90 transition-colors featured-card-title">
               {title}
             </h2>
           </Link>

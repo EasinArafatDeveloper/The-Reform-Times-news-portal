@@ -126,3 +126,12 @@
     overflow: hidden;
   }
 }
+
+/* Bulletproof fix to force the featured card text to be white in all themes */
+.featured-card-title {
+  color: #ffffff !important;
+}
+
+.group:hover .featured-card-title {
+  color: var(--color-primary) !important;
+}
