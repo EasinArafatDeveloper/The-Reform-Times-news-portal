@@ -79,6 +79,25 @@ export default async function Home({
     ['national', 'politics', 'bangladesh', 'National', 'Politics', 'Bangladesh'].includes(a.category)
   ).slice(0, 6);
 
+  // Fetch real newsletter subscribers count dynamically from MongoDB
+  const emailSubscribersCount = await db.collection('subscribers').countDocuments();
+
+  const toBengaliNumber = (num: number): string => {
+    const englishToBengaliMap: { [key: string]: string } = {
+      '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪',
+      '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯'
+    };
+    return num
+      .toString()
+      .split('')
+      .map(char => englishToBengaliMap[char] || char)
+      .join('');
+  };
+
+  const formattedSubscriberCount = isBangla
+    ? `${toBengaliNumber(emailSubscribersCount)}+`
+    : `${emailSubscribersCount.toLocaleString('en-US')}+`;
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Trending Ticker */}
@@ -156,8 +175,8 @@ export default async function Home({
                   </h3>
                   <p className="text-white/80 text-sm mb-6 relative z-10 leading-relaxed">
                     {isBangla 
-                      ? 'প্রতি সপ্তাহে আমাদের সেরা অনুসন্ধানগুলো পেতে ৪৫,০০০+ পাঠকের সাথে যোগ দিন।' 
-                      : 'Join 45,000+ readers getting our top investigations every week.'}
+                      ? `প্রতি সপ্তাহে আমাদের সেরা অনুসন্ধানগুলো পেতে ${formattedSubscriberCount} পাঠকের সাথে যোগ দিন।` 
+                      : `Join ${formattedSubscriberCount} readers getting our top investigations every week.`}
                   </p>
                   <SubscribeForm locale={locale} variant="sidebar" />
                 </div>
