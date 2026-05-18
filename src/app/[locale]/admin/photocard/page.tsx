@@ -134,9 +134,9 @@ export default function PhotocardGenerator() {
         const logoPath = isDark ? '/dark mode logo.png' : '/the reform times logo.png';
         const logo = await loadImage(logoPath);
         // Draw logo nicely on top-left
-        const logoHeight = 65;
+        const logoHeight = 95;
         const logoWidth = logo.width * (logoHeight / logo.height);
-        ctx.drawImage(logo, 50, 60, logoWidth, logoHeight);
+        ctx.drawImage(logo, 50, 35, logoWidth, logoHeight);
       } catch (err) {
         console.error("Failed to load header logo on canvas, falling back to text representation", err);
         ctx.fillStyle = isDark ? '#ffffff' : '#0b0f19';
@@ -148,33 +148,50 @@ export default function PhotocardGenerator() {
       const badgeY = 60;
       const badgeHeight = 35;
       
-      // Draw first box (BREAKING / RED)
-      ctx.fillStyle = accentColor;
+      // Calculate widths and right align to 1030
       ctx.font = "bold 15px sans-serif";
       const b1Text = badgeType.toUpperCase();
       const b1Width = ctx.measureText(b1Text).width + 24;
-      ctx.fillRect(800 - b1Width, badgeY, b1Width, badgeHeight);
+
+      const b2Text = badgeText.toUpperCase();
+      const b2Width = ctx.measureText(b2Text).width + 24;
+
+      const badgeRightBound = 1030;
+      const b2X = badgeRightBound - b2Width;
+      const b1X = b2X - b1Width;
+
+      ctx.textBaseline = 'top';
+
+      // Draw first box (BREAKING / RED)
+      ctx.fillStyle = accentColor;
+      ctx.fillRect(b1X, badgeY, b1Width, badgeHeight);
       ctx.fillStyle = '#ffffff';
-      ctx.fillText(b1Text, 800 - b1Width + 12, badgeY + 23);
+      ctx.fillText(b1Text, b1X + 12, badgeY + (badgeHeight - 15) / 2);
 
       // Draw second box (NEWS / BLUE)
       ctx.fillStyle = '#0f172a';
-      const b2Text = badgeText.toUpperCase();
-      const b2Width = ctx.measureText(b2Text).width + 24;
-      ctx.fillRect(800, badgeY, b2Width, badgeHeight);
+      ctx.fillRect(b2X, badgeY, b2Width, badgeHeight);
       ctx.fillStyle = '#ffffff';
-      ctx.fillText(b2Text, 800 + 12, badgeY + 23);
+      ctx.fillText(b2Text, b2X + 12, badgeY + (badgeHeight - 15) / 2);
 
-      // 5. Draw Header Date & Vertical Bar
-      const dateX = 800 + b2Width + 30;
+      // 5. Draw Header Date & Vertical Bar (placed on the next line below badges)
+      const dateY = 110;
+      const dateTextString = dateText.toUpperCase();
       ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
-      ctx.font = "600 15px sans-serif";
-      ctx.fillText(dateText, dateX, badgeY + 23);
-      
-      // Draw red vertical bar after date
-      const dateTextWidth = ctx.measureText(dateText).width;
+      ctx.font = "bold 14px sans-serif";
+      const dateTextWidth = ctx.measureText(dateTextString).width;
+
+      const redBarWidth = 3;
+      const gap = 10;
+      const redBarX = badgeRightBound - redBarWidth;
+      const dateTextX = redBarX - gap - dateTextWidth;
+
+      // Draw date text
+      ctx.fillText(dateTextString, dateTextX, dateY + (20 - 14) / 2);
+
+      // Draw red vertical bar next to date
       ctx.fillStyle = accentColor;
-      ctx.fillRect(dateX + dateTextWidth + 15, badgeY + 5, 3, 25);
+      ctx.fillRect(redBarX, dateY, redBarWidth, 20);
 
       // 6. Draw Divider Line
       ctx.fillStyle = isDark ? '#1e293b' : '#e2e8f0';
@@ -654,13 +671,13 @@ export default function PhotocardGenerator() {
             className={`aspect-square w-full max-w-[500px] border shadow-2xl rounded-2xl flex flex-col p-[22px] justify-between relative overflow-hidden transition-all duration-300 ${themeMode === 'dark' ? 'text-white' : 'text-slate-900'}`}
           >
             {/* 1. Header Row */}
-            <div className="flex justify-between items-center shrink-0">
+            <div className="flex justify-between items-start shrink-0">
               {/* Logo block */}
-              <div className="flex items-center">
+              <div className="flex items-center pt-1">
                 <img 
                   src={themeMode === 'dark' ? "/dark mode logo.png" : "/the reform times logo.png"} 
                   alt="The Reform Times Logo"
-                  className="h-[32px] w-auto object-contain"
+                  className="h-[45px] w-auto object-contain"
                   onError={(e) => {
                     // Fallback to text logo if image loading fails locally
                     (e.target as HTMLElement).style.display = 'none';
@@ -668,30 +685,34 @@ export default function PhotocardGenerator() {
                 />
               </div>
 
-              {/* Badges block */}
-              <div className="flex items-center gap-0">
-                {/* Breaking / Red badge */}
-                <div 
-                  style={{ backgroundColor: accentColor }}
-                  className="px-2 py-1 text-[8px] font-black text-white uppercase tracking-wider rounded-l-sm"
-                >
-                  {badgeType}
-                </div>
-                {/* News / Blue badge */}
-                <div className="bg-slate-950 px-2 py-1 text-[8px] font-black text-white uppercase tracking-wider rounded-r-sm">
-                  {badgeText}
+              {/* Badges and Date block (Vertical Stack) */}
+              <div className="flex flex-col items-end shrink-0">
+                {/* Badges row */}
+                <div className="flex items-center gap-0">
+                  {/* Breaking / Red badge */}
+                  <div 
+                    style={{ backgroundColor: accentColor }}
+                    className="px-2 py-0.5 text-[8px] font-black text-white uppercase tracking-wider rounded-l-sm"
+                  >
+                    {badgeType}
+                  </div>
+                  {/* News / Blue badge */}
+                  <div className="bg-slate-950 px-2 py-0.5 text-[8px] font-black text-white uppercase tracking-wider rounded-r-sm">
+                    {badgeText}
+                  </div>
                 </div>
 
-                {/* Date stamp */}
-                <span className={`text-[8px] font-extrabold uppercase ml-3 tracking-widest ${themeMode === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                  {dateText}
-                </span>
-
-                {/* Little red indicator vertical bar */}
-                <div 
-                  style={{ backgroundColor: accentColor }}
-                  className="w-[2px] h-[12px] ml-2"
-                />
+                {/* Date stamp row (placed below the badges) */}
+                <div className="flex items-center gap-1.5 mt-1 pr-1">
+                  <span className={`text-[8px] font-extrabold uppercase tracking-widest ${themeMode === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                    {dateText}
+                  </span>
+                  {/* Little red indicator vertical bar */}
+                  <div 
+                    style={{ backgroundColor: accentColor }}
+                    className="w-[1.5px] h-[10px]"
+                  />
+                </div>
               </div>
             </div>
 
