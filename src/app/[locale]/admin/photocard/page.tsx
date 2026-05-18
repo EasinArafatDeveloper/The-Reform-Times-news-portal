@@ -728,11 +728,11 @@ export default function PhotocardGenerator() {
             {/* 2. Top Header Divider */}
             <hr 
               style={{ borderColor: themeMode === 'dark' ? '#1e293b' : '#e2e8f0' }} 
-              className="mt-3.5 mb-2.5 border-t w-full opacity-80" 
+              className="mt-2.5 mb-2 border-t w-full opacity-80" 
             />
 
             {/* 3. Main Body: Photo Wrapper */}
-            <div className="relative w-full shrink-0 flex items-center justify-center overflow-visible my-1 group">
+            <div className="relative w-full shrink-0 flex items-center justify-center overflow-visible my-0.5 group">
               {/* Top-Left Red Corner Accent Frame */}
               <div 
                 style={{ 
@@ -754,7 +754,7 @@ export default function PhotocardGenerator() {
               {/* Actual Image Render */}
               <div 
                 style={{ borderColor: themeMode === 'dark' ? '#1e293b' : '#e2e8f0' }}
-                className="w-full rounded-md overflow-hidden bg-slate-100 border relative flex items-center justify-center aspect-[16/9.5] shrink-0"
+                className="w-full rounded-md overflow-hidden bg-slate-100 border relative flex items-center justify-center aspect-[16/8] shrink-0"
               >
                 {imageSrc ? (
                   <img 
@@ -772,7 +772,7 @@ export default function PhotocardGenerator() {
             </div>
 
             {/* 4. Category Tag & Accent horizontal line */}
-            <div className="flex items-center shrink-0 mt-3 mb-2.5">
+            <div className="flex items-center shrink-0 mt-2 mb-1.5">
               <span className="bg-slate-950 text-white text-[7px] font-black uppercase tracking-wider px-2 py-0.5 rounded-sm">
                 {category}
               </span>
@@ -783,11 +783,11 @@ export default function PhotocardGenerator() {
             </div>
 
             {/* 5. Title & Vertical Red bar */}
-            <div className="flex items-start gap-3 w-full shrink-0 min-h-[90px] overflow-hidden">
+            <div className="flex items-start gap-3 w-full shrink-0 min-h-[75px] overflow-hidden">
               {/* Left red thick bar */}
               <div 
                 style={{ backgroundColor: accentColor }}
-                className="w-[3px] h-[80px] shrink-0 self-stretch rounded-sm"
+                className="w-[3px] h-[65px] shrink-0 self-stretch rounded-sm"
               />
 
               {/* Title Text and Summary details */}
@@ -815,36 +815,45 @@ export default function PhotocardGenerator() {
             {/* 6. Footer Divider Line */}
             <hr 
               style={{ borderColor: themeMode === 'dark' ? '#1e293b' : '#e2e8f0' }} 
-              className="my-3 border-t w-full opacity-80" 
+              className="my-1.5 border-t w-full opacity-80" 
             />
 
             {/* 7. Footer section (Reporter, source, brand box) */}
             <div className="flex justify-between items-center shrink-0">
-              {/* Reporter Info */}
-              <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${themeMode === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                  <User size={14} className={themeMode === 'dark' ? 'text-slate-400' : 'text-slate-500'} />
+              {/* Left & Center elements grouped together for perfect spacing and alignment */}
+              <div className="flex items-center gap-3.5">
+                {/* Reporter Info */}
+                <div className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${themeMode === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                    <User size={14} className={themeMode === 'dark' ? 'text-slate-400' : 'text-slate-500'} />
+                  </div>
+                  <div className="flex flex-col items-start leading-none text-left">
+                    <span className={`text-[8.5px] font-extrabold ${/[৳-৿]/.test(reporterName) ? 'font-bengali-sans' : ''} ${themeMode === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>
+                      {reporterName}
+                    </span>
+                    <span className={`text-[7.5px] font-bold text-slate-400 tracking-wide mt-0.5 ${/[৳-৿]/.test(reporterTitle) ? 'font-bengali-sans' : ''}`}>
+                      {reporterTitle}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col items-start leading-none text-left">
-                  <span className={`text-[8.5px] font-extrabold ${themeMode === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>{reporterName}</span>
-                  <span className="text-[7.5px] font-bold text-slate-400 tracking-wide mt-0.5">{reporterTitle}</span>
-                </div>
-              </div>
 
-              {/* Vertical small divider */}
-              <div 
-                style={{ backgroundColor: themeMode === 'dark' ? '#1e293b' : '#e2e8f0' }}
-                className="w-[1px] h-6 mx-2"
-              />
+                {/* Vertical small divider */}
+                <div 
+                  style={{ backgroundColor: themeMode === 'dark' ? '#1e293b' : '#e2e8f0' }}
+                  className="w-[1px] h-6"
+                />
 
-              {/* Source Info */}
-              <div className="flex items-center gap-2 flex-1 pl-1">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${themeMode === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                  <Globe size={14} className={themeMode === 'dark' ? 'text-slate-400' : 'text-slate-500'} />
-                </div>
-                <div className="flex flex-col items-start leading-none text-left">
-                  <span className="text-[6.5px] font-extrabold text-slate-400 uppercase tracking-widest">Source</span>
-                  <span className={`text-[8.5px] font-extrabold mt-0.5 ${themeMode === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>{sourceUrl}</span>
+                {/* Source Info */}
+                <div className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${themeMode === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                    <Globe size={14} className={themeMode === 'dark' ? 'text-slate-400' : 'text-slate-500'} />
+                  </div>
+                  <div className="flex flex-col items-start leading-none text-left">
+                    <span className="text-[6.5px] font-extrabold text-slate-400 uppercase tracking-widest">Source</span>
+                    <span className={`text-[8.5px] font-extrabold mt-0.5 ${/[৳-৿]/.test(sourceUrl) ? 'font-bengali-sans' : ''} ${themeMode === 'dark' ? 'text-slate-200' : 'text-slate-900'}`}>
+                      {sourceUrl}
+                    </span>
+                  </div>
                 </div>
               </div>
 
