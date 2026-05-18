@@ -39,7 +39,7 @@ export function Footer({ locale = 'bn' }: { locale?: string }) {
               <img 
                 src="/dark mode logo.png" 
                 alt="The Reform Times" 
-                className="h-[75px] md:h-[115px] w-auto object-contain -my-4 block" 
+                className="h-[90px] md:h-[130px] w-auto object-contain -my-5 block" 
               />
             </Link>
             <p className="text-white/50 text-base leading-relaxed font-medium">

@@ -67,12 +67,12 @@ export function Navbar() {
           <img 
             src="/the reform times logo.png" 
             alt="The Reform Times" 
-            className="h-12 sm:h-14 md:h-16 w-auto object-contain dark:hidden" 
+            className="h-[55px] sm:h-[65px] md:h-[75px] w-auto object-contain dark:hidden" 
           />
           <img 
             src="/dark mode logo.png" 
             alt="The Reform Times" 
-            className="h-[75px] sm:h-[95px] md:h-[115px] w-auto object-contain -my-4 hidden dark:block" 
+            className="h-[90px] sm:h-[110px] md:h-[130px] w-auto object-contain -my-5 hidden dark:block" 
           />
         </Link>
 

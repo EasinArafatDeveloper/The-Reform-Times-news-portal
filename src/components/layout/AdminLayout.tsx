@@ -46,6 +46,7 @@ const adminNavLinks = [
     { name: 'Fact Checks', icon: ShieldCheck, href: '/admin/fact-checks' },
     { name: 'Video Reports', icon: Video, href: '/admin/videos' },
     { name: 'Opinions', icon: MessageSquare, href: '/admin/opinions' },
+    { name: 'Photocard Generator', icon: ImageIcon, href: '/admin/photocard' },
   ]},
   { group: "Submissions", links: [
     { name: 'Story Submissions', icon: Inbox, href: '/admin/submissions', disabled: true },

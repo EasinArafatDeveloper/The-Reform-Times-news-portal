@@ -16,7 +16,9 @@ import {
   Mail,
   Search,
   ChevronRight,
-  X
+  X,
+  PlusCircle,
+  Image as ImageIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -86,6 +88,31 @@ export default function Dashboard() {
             )}
           </div>
         ))}
+      </div>
+
+      {/* Quick Creator Panel */}
+      <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
+        <h2 className="text-lg font-serif font-bold text-title mb-4">Quick Creator Tools</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <Link href="/admin/articles/create" className="flex items-center gap-4 p-4 rounded-xl bg-surface hover:bg-primary hover:text-white transition-all border border-border group shadow-sm">
+            <div className="p-3 rounded-lg bg-card group-hover:bg-white/10 transition-colors text-primary group-hover:text-white">
+              <PlusCircle size={20} />
+            </div>
+            <div className="text-left">
+              <h4 className="font-bold text-sm text-title group-hover:text-white leading-none mb-1">Create Article</h4>
+              <p className="text-xs text-caption group-hover:text-white/80">Draft a new news article</p>
+            </div>
+          </Link>
+          <Link href="/admin/photocard" className="flex items-center gap-4 p-4 rounded-xl bg-surface hover:bg-primary hover:text-white transition-all border border-border group shadow-sm">
+            <div className="p-3 rounded-lg bg-card group-hover:bg-white/10 transition-colors text-primary group-hover:text-white">
+              <ImageIcon size={20} />
+            </div>
+            <div className="text-left">
+              <h4 className="font-bold text-sm text-title group-hover:text-white leading-none mb-1">Photocard Generator</h4>
+              <p className="text-xs text-caption group-hover:text-white/80">Create social media cards</p>
+            </div>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
