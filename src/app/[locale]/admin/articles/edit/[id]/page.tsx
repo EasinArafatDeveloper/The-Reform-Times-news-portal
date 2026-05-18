@@ -326,7 +326,7 @@ export default function EditArticlePage() {
     <div className="min-h-screen bg-background pb-24 text-body transition-colors">
       
       {/* Studio Header Sticky Bar */}
-      <div className="sticky top-0 z-[60] bg-[#0F172A] text-white px-4 sm:px-6 lg:px-8 py-3.5 shadow-xl transition-all duration-300 border-b border-slate-800">
+      <div className="md:sticky md:top-0 relative z-[60] bg-[#0F172A] text-white px-4 sm:px-6 lg:px-8 py-3.5 shadow-xl transition-all duration-300 border-b border-slate-800">
         <div className="max-w-[1600px] mx-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 sm:gap-4 md:gap-6 min-w-0">
             <Link href={`/${locale}/admin/articles`} className="p-2 hover:bg-slate-800 rounded-full transition-all text-slate-400 hover:text-white shrink-0">

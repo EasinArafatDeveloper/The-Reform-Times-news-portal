@@ -118,8 +118,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside 
         className={cn(
-          "bg-secondary text-white transition-all duration-300 fixed inset-y-0 left-0 z-50 lg:relative",
-          isSidebarOpen ? "w-64" : "w-0 lg:w-20 overflow-hidden"
+          "bg-secondary text-white transition-all duration-300 fixed inset-y-0 left-0 z-50 w-64 -translate-x-full lg:translate-x-0 lg:relative",
+          isSidebarOpen ? "translate-x-0 lg:w-64" : "lg:w-20 overflow-hidden"
         )}
       >
         <div className="p-6 flex items-center justify-between">
