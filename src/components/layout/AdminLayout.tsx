@@ -48,19 +48,19 @@ const adminNavLinks = [
     { name: 'Opinions', icon: MessageSquare, href: '/admin/opinions' },
   ]},
   { group: "Submissions", links: [
-    { name: 'Story Submissions', icon: Inbox, href: '/admin/submissions' },
+    { name: 'Story Submissions', icon: Inbox, href: '/admin/submissions', disabled: true },
     { name: 'Anonymous Tips', icon: SearchIcon, href: '/admin/tips' },
-    { name: 'Comments', icon: MessageSquare, href: '/admin/comments' },
+    { name: 'Comments', icon: MessageSquare, href: '/admin/comments', disabled: true },
   ]},
   { group: "Management", links: [
-    { name: 'Media Library', icon: ImageIcon, href: '/admin/media' },
+    { name: 'Media Library', icon: ImageIcon, href: '/admin/media', disabled: true },
     { name: 'Newsletter', icon: Mail, href: '/admin/newsletter' },
-    { name: 'Advertisements', icon: Megaphone, href: '/admin/ads' },
-    { name: 'Analytics', icon: BarChart3, href: '/admin/analytics' },
+    { name: 'Advertisements', icon: Megaphone, href: '/admin/ads', disabled: true },
+    { name: 'Analytics', icon: BarChart3, href: '/admin/analytics', disabled: true },
   ]},
   { group: "System", links: [
     { name: 'Notifications', icon: Bell, href: '/admin/notifications' },
-    { name: 'Roles & Permissions', icon: UserPlus, href: '/admin/roles' },
+    { name: 'Roles & Permissions', icon: UserPlus, href: '/admin/roles', disabled: true },
     { name: 'Settings', icon: Settings, href: '/admin/settings' },
   ]}
 ];
@@ -140,6 +140,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 {group.links.map((link) => {
                   const linkUrl = `/${locale}${link.href}`;
                   const isActive = pathname === linkUrl || pathname === link.href;
+
+                  if ('disabled' in link && link.disabled) {
+                    return (
+                      <li key={link.name}>
+                        <div 
+                          className={cn(
+                            "flex items-center justify-between gap-3 px-3 py-3 rounded-xl text-sm font-medium opacity-35 cursor-not-allowed select-none text-white/50",
+                            !isSidebarOpen && "justify-center px-0"
+                          )}
+                          title={`${link.name} (Upcoming Feature)`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <link.icon size={22} className="text-white/20 shrink-0" />
+                            <span className={cn("transition-opacity duration-300", !isSidebarOpen && "lg:hidden")}>{link.name}</span>
+                          </div>
+                          <span className={cn("text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/10 text-white/40 shrink-0", !isSidebarOpen && "lg:hidden")}>Soon</span>
+                        </div>
+                      </li>
+                    );
+                  }
+
                   return (
                     <li key={link.name}>
                       <Link 
