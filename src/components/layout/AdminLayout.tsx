@@ -115,23 +115,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
 
-      {/* Sidebar */}
       <aside 
         className={cn(
-          "bg-secondary text-white transition-all duration-300 fixed inset-y-0 left-0 z-50 w-64 -translate-x-full lg:translate-x-0 lg:relative",
+          "bg-secondary text-white transition-all duration-300 fixed inset-y-0 left-0 z-50 w-64 -translate-x-full lg:translate-x-0 lg:relative flex flex-col h-full",
           isSidebarOpen ? "translate-x-0 lg:w-64" : "lg:w-20 overflow-hidden"
         )}
       >
-        <div className="p-6 flex items-center justify-between">
+        <div className="p-6 flex items-center justify-between shrink-0">
           <Link href={`/${locale}/admin/dashboard`} className={cn("font-serif font-bold text-xl transition-opacity", !isSidebarOpen && "lg:opacity-0")}>
             Reform<span className="text-primary">Admin</span>
           </Link>
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="lg:hidden text-white/60 hover:text-white">
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="lg:hidden text-white/60 hover:text-white cursor-pointer">
             <X size={20} />
           </button>
         </div>
 
-        <nav className="mt-4 px-4 space-y-8 h-[calc(100vh-100px)] overflow-y-auto scrollbar-hide pb-10">
+        <nav className="mt-4 px-4 space-y-8 flex-1 overflow-y-auto scrollbar-hide pb-6">
           {adminNavLinks.map((group) => (
             <div key={group.group}>
               <h3 className={cn("text-[10px] uppercase font-bold text-white/40 tracking-widest mb-4 px-2", !isSidebarOpen && "lg:hidden")}>
@@ -165,10 +164,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ))}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/20 border-t border-white/10">
+        <div className="shrink-0 p-4 bg-black/25 border-t border-white/10 pb-8 sm:pb-6 lg:pb-4">
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-white/60 hover:text-white transition-colors"
+            className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all cursor-pointer"
           >
             <LogOut size={18} />
             <span className={cn(!isSidebarOpen && "lg:hidden")}>Logout</span>
