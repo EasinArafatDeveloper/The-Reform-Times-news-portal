@@ -183,7 +183,7 @@ export default async function NewsDetailsPage({ params }: { params: Promise<{ sl
       {/* Immersive Hero Header */}
       <div className="relative w-full h-[60vh] md:h-[75vh] min-h-[500px] bg-black">
         <img 
-          src={article.image} 
+          src={article.image || article.mainImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200'} 
           alt={title}
           className="w-full h-full object-cover opacity-80"
         />
