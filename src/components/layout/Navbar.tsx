@@ -17,6 +17,9 @@ export function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   
   const pathname = usePathname();
   const router = useRouter();
@@ -43,12 +46,51 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const delayDebounce = setTimeout(async () => {
+      setIsLoadingSuggestions(true);
+      setShowSuggestions(true);
+      try {
+        const res = await fetch(`/api/articles?q=${encodeURIComponent(searchQuery.trim())}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSuggestions(Array.isArray(data) ? data.slice(0, 5) : []);
+        }
+      } catch (err) {
+        console.error('Error fetching suggestions:', err);
+      } finally {
+        setIsLoadingSuggestions(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const handleClose = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.search-container')) {
+        setShowSuggestions(false);
+      }
+    };
+    window.addEventListener('click', handleClose);
+    return () => window.removeEventListener('click', handleClose);
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/${locale}/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
       setSearchQuery('');
+      setSuggestions([]);
+      setShowSuggestions(false);
     }
   };
 
@@ -125,25 +167,87 @@ export function Navbar() {
 
         {/* Search Bar Overlay */}
         {isSearchOpen && (
-          <div className="absolute inset-0 flex items-center px-4 bg-background z-10">
-            <form onSubmit={handleSearch} className="flex-1 flex items-center gap-4">
-              <Search size={20} className="text-primary" />
-              <input 
-                autoFocus
-                type="text" 
-                placeholder={isBangla ? "খুঁজুন..." : "Search for news, topics..."}
-                className="flex-1 bg-transparent border-none outline-none text-lg text-title font-serif"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button 
-                type="button"
-                onClick={() => setIsSearchOpen(false)}
-                className="p-2 hover:bg-surface rounded-full text-caption transition-colors"
-              >
-                <X size={24} />
-              </button>
-            </form>
+          <div className="absolute inset-0 flex items-center px-4 bg-background z-10 search-container">
+            <div className="container max-w-4xl relative flex items-center h-full">
+              <form onSubmit={handleSearch} className="flex-1 flex items-center gap-4">
+                <Search size={20} className="text-primary" />
+                <input 
+                  autoFocus
+                  type="text" 
+                  placeholder={isBangla ? "খুঁজুন..." : "Search for news, topics..."}
+                  className="flex-1 bg-transparent border-none outline-none text-lg text-title font-serif"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setShowSuggestions(true)}
+                />
+                {isLoadingSuggestions && (
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0"></div>
+                )}
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setSearchQuery('');
+                    setSuggestions([]);
+                    setShowSuggestions(false);
+                  }}
+                  className="p-2 hover:bg-surface rounded-full text-caption transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </form>
+
+              {/* Desktop Dynamic Suggestions Dropdown */}
+              {showSuggestions && searchQuery.trim() && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border shadow-2xl rounded-b-2xl overflow-hidden z-50 animate-fadeIn">
+                  {isLoadingSuggestions ? (
+                    <div className="p-6 text-center text-caption flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <span>{isBangla ? 'অনুসন্ধান করা হচ্ছে...' : 'Searching...'}</span>
+                    </div>
+                  ) : suggestions.length > 0 ? (
+                    <div className="py-2 divide-y divide-border/60">
+                      {suggestions.map((article) => {
+                        const slug = typeof article.slug === 'object' ? (article.slug.en || article.slug.bn || '') : (article.slug || '');
+                        const title = getLocalizedContent<string>(article.title, locale);
+                        const category = getLocalizedContent<string>(article.category, locale);
+                        return (
+                          <Link
+                            key={article.id}
+                            href={`/${locale}/news/${slug}`}
+                            onClick={() => {
+                              setIsSearchOpen(false);
+                              setSearchQuery('');
+                              setSuggestions([]);
+                              setShowSuggestions(false);
+                            }}
+                            className="flex items-center gap-4 px-4 py-3 hover:bg-surface transition-colors group cursor-pointer"
+                          >
+                            <img
+                              src={article.image || article.mainImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=150'}
+                              alt={title}
+                              className="w-12 h-12 object-cover rounded-lg flex-shrink-0 border border-border/40"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-widest block mb-0.5">
+                                {category}
+                              </span>
+                              <h4 className="text-sm font-serif font-bold text-title group-hover:text-primary transition-colors truncate">
+                                {title}
+                              </h4>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center text-caption font-serif">
+                      {isBangla ? 'কোনো সংবাদ পাওয়া যায়নি।' : 'No matching articles found.'}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -180,7 +284,7 @@ export function Navbar() {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 w-full bg-card border-b border-border shadow-lg py-4 px-4 flex flex-col gap-4">
-          <div className="relative mb-2">
+          <div className="relative mb-2 search-container">
              <form onSubmit={handleSearch}>
                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-caption" />
                 <input 
@@ -189,8 +293,60 @@ export function Navbar() {
                   className="w-full bg-surface border border-border rounded-lg py-2 pl-10 pr-4 outline-none focus:border-primary text-sm"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setShowSuggestions(true)}
                 />
              </form>
+
+              {/* Mobile Dynamic Suggestions Dropdown */}
+              {showSuggestions && searchQuery.trim() && (
+                <div className="absolute left-0 right-0 mt-1 bg-card border border-border shadow-xl rounded-xl overflow-hidden z-50 max-h-[300px] overflow-y-auto">
+                  {isLoadingSuggestions ? (
+                    <div className="p-4 text-center text-caption flex items-center justify-center gap-2">
+                      <div className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-xs">{isBangla ? 'অনুসন্ধান করা হচ্ছে...' : 'Searching...'}</span>
+                    </div>
+                  ) : suggestions.length > 0 ? (
+                    <div className="py-1 divide-y divide-border/60">
+                      {suggestions.map((article) => {
+                        const slug = typeof article.slug === 'object' ? (article.slug.en || article.slug.bn || '') : (article.slug || '');
+                        const title = getLocalizedContent<string>(article.title, locale);
+                        const category = getLocalizedContent<string>(article.category, locale);
+                        return (
+                          <Link
+                            key={article.id}
+                            href={`/${locale}/news/${slug}`}
+                            onClick={() => {
+                              setIsMobileMenuOpen(false);
+                              setSearchQuery('');
+                              setSuggestions([]);
+                              setShowSuggestions(false);
+                            }}
+                            className="flex items-center gap-3 px-3 py-2.5 hover:bg-surface transition-colors group cursor-pointer"
+                          >
+                            <img
+                              src={article.image || article.mainImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=100'}
+                              alt={title}
+                              className="w-10 h-10 object-cover rounded-md flex-shrink-0 border border-border/40"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <span className="text-[9px] font-bold text-primary uppercase tracking-widest block mb-0.5">
+                                {category}
+                              </span>
+                              <h4 className="text-xs font-serif font-bold text-title group-hover:text-primary transition-colors truncate">
+                                {title}
+                              </h4>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-xs text-caption font-serif">
+                      {isBangla ? 'কোনো সংবাদ পাওয়া যায়নি।' : 'No matching articles found.'}
+                    </div>
+                  )}
+                </div>
+              )}
           </div>
           {navigationLinks.map((link) => {
             const href = link.href === '/' ? `/${locale}` : `/${locale}${link.href}`;
