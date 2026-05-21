@@ -27,7 +27,15 @@ export default async function VideoPage({
         { type: { $in: ['Video Report', 'video'] } },
         { category: { $in: ['Video', 'video'] } }
       ],
-      status: 'Published' 
+      $and: [
+        {
+          $or: [
+            { status: 'Published' },
+            { status: 'published' },
+            { status: 'Scheduled', scheduledAt: { $lte: new Date().toISOString() } }
+          ]
+        }
+      ]
     })
     .sort({ createdAt: -1 })
     .toArray();
@@ -55,7 +63,7 @@ export default async function VideoPage({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {videos.map((article, i) => {
               const localizedTitle = getLocalizedContent<string>(article.title, locale);
-              const localizedSlug = getLocalizedContent<string>(article.slug, locale);
+              const localizedSlug = typeof article.slug === 'object' ? (article.slug.en || article.slug.bn || '') : (article.slug || '');
               const localizedReadTime = getLocalizedContent<string>(article.readTime || "", locale);
               const localizedCategory = getLocalizedContent<string>(article.category, locale);
 

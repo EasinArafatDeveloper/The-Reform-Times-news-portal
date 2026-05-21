@@ -4,12 +4,11 @@ import { mockArticles } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { bn as bnLocale } from "date-fns/locale";
-import { Link as LinkIcon, Mail } from "lucide-react";
-import { TwitterIcon, FacebookIcon, LinkedinIcon } from "@/components/ui/icons";
 import Link from "next/link";
 import { NewsCard } from "@/components/shared/NewsCard";
 import { ReadingProgressBar } from "@/components/ui/ReadingProgressBar";
 import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
+import { ShareButtons } from "@/components/shared/ShareButtons";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string, locale: string }> }) {
   const { slug, locale } = await params;
@@ -34,6 +33,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     ]
   }) as any;
 
+  if (article && article.status !== 'Published' && article.status !== 'published') {
+    const isScheduledPast = article.status === 'Scheduled' && article.scheduledAt && new Date(article.scheduledAt) <= new Date();
+    if (!isScheduledPast) {
+      article = null;
+    }
+  }
+
   if (!article) {
     article = mockArticles.find(a => {
       const s = getLocalizedContent<string>(a.slug, 'en');
@@ -47,9 +53,37 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = getLocalizedContent<string>(article.title, locale);
   const excerpt = getLocalizedContent<string>(article.excerpt, locale);
 
+  const siteUrl = process.env.NEXTAUTH_URL || (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : 'http://localhost:3000');
+  const articleSlug = typeof article.slug === 'object' ? (article.slug.en || article.slug.bn) : article.slug;
+  const articleUrl = `${siteUrl}/${locale}/news/${articleSlug}`;
+  const imageUrl = article.image || article.mainImage || `${siteUrl}/logo icon 1 .png`;
+  const absoluteImageUrl = imageUrl.startsWith('http') ? imageUrl : `${siteUrl}${imageUrl}`;
+
   return {
     title: `${title} | The Reform Times`,
     description: excerpt,
+    openGraph: {
+      title: `${title} | The Reform Times`,
+      description: excerpt,
+      url: articleUrl,
+      siteName: 'The Reform Times',
+      images: [
+        {
+          url: absoluteImageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        }
+      ],
+      type: 'article',
+      locale: locale === 'bn' ? 'bn_BD' : 'en_US',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | The Reform Times`,
+      description: excerpt,
+      images: [absoluteImageUrl],
+    }
   };
 }
 
@@ -77,6 +111,13 @@ export default async function NewsDetailsPage({ params }: { params: Promise<{ sl
       { 'slug.bn': encodedSlug }
     ]
   }) as any;
+
+  if (article && article.status !== 'Published' && article.status !== 'published') {
+    const isScheduledPast = article.status === 'Scheduled' && article.scheduledAt && new Date(article.scheduledAt) <= new Date();
+    if (!isScheduledPast) {
+      article = null;
+    }
+  }
 
   if (article && article._id) {
     db.collection('articles').updateOne(
@@ -131,6 +172,10 @@ export default async function NewsDetailsPage({ params }: { params: Promise<{ sl
         a.id !== article.id
       ).slice(0, 3);
 
+  const siteUrl = process.env.NEXTAUTH_URL || (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : 'http://localhost:3000');
+  const articleSlug = typeof article.slug === 'object' ? (article.slug.en || article.slug.bn) : article.slug;
+  const articleUrl = `${siteUrl}/${locale}/news/${articleSlug}`;
+
   return (
     <div className="bg-background">
       <ReadingProgressBar />
@@ -181,16 +226,7 @@ export default async function NewsDetailsPage({ params }: { params: Promise<{ sl
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
           
           {/* Left Sidebar - Social Share */}
-          <div className="lg:w-16 shrink-0 order-2 lg:order-1 flex lg:flex-col items-center gap-4 lg:sticky lg:top-32 h-fit border-t lg:border-t-0 border-border pt-8 lg:pt-0">
-            <span className="text-[10px] uppercase font-bold text-caption tracking-widest lg:-rotate-90 lg:mb-6 whitespace-nowrap">
-              {isBangla ? "শেয়ার করুন" : "Share Story"}
-            </span>
-            <button className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-caption hover:border-primary hover:bg-primary/5 hover:text-primary transition-all"><TwitterIcon width={18} height={18} /></button>
-            <button className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-caption hover:border-primary hover:bg-primary/5 hover:text-primary transition-all"><FacebookIcon width={18} height={18} /></button>
-            <button className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-caption hover:border-primary hover:bg-primary/5 hover:text-primary transition-all"><LinkedinIcon width={18} height={18} /></button>
-            <button className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-caption hover:border-primary hover:bg-primary/5 hover:text-primary transition-all"><Mail size={18} /></button>
-            <button className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-caption hover:border-primary hover:bg-primary/5 hover:text-primary transition-all"><LinkIcon size={18} /></button>
-          </div>
+          <ShareButtons url={articleUrl} title={title} isBangla={isBangla} />
 
           {/* Main Content Area */}
           <div className="flex-1 order-1 lg:order-2">

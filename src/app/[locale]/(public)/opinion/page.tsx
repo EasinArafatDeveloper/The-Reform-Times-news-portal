@@ -26,7 +26,15 @@ export default async function OpinionPage({
         { type: { $in: ['Opinion', 'opinion'] } },
         { category: { $in: ['Opinions', 'opinions', 'opinion'] } }
       ],
-      status: 'Published' 
+      $and: [
+        {
+          $or: [
+            { status: 'Published' },
+            { status: 'published' },
+            { status: 'Scheduled', scheduledAt: { $lte: new Date().toISOString() } }
+          ]
+        }
+      ]
     })
     .sort({ createdAt: -1 })
     .toArray();
@@ -53,7 +61,7 @@ export default async function OpinionPage({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
           {opinions.map(article => {
             const localizedTitle = getLocalizedContent<string>(article.title, locale);
-            const localizedSlug = getLocalizedContent<string>(article.slug, locale);
+            const localizedSlug = typeof article.slug === 'object' ? (article.slug.en || article.slug.bn || '') : (article.slug || '');
             const localizedExcerpt = getLocalizedContent<string>(article.excerpt, locale);
             const localizedReadTime = getLocalizedContent<string>(article.readTime, locale);
             const localizedAuthorRole = getLocalizedContent<string>(article.author.role, locale);

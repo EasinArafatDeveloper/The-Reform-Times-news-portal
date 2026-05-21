@@ -26,7 +26,7 @@ export function NewsCard({ article, layout = "vertical", className, imageClassNa
   const excerpt = getLocalizedContent<string>(article.excerpt, locale);
   const category = getLocalizedContent<string>(article.category, locale);
   const authorName = article.author.name; // Author name is usually a string, not bilingual in mock data yet but good to keep in mind
-  const slug = getLocalizedContent<string>(article.slug, locale);
+  const slug = typeof article.slug === 'object' ? (article.slug.en || article.slug.bn || '') : (article.slug || '');
   const readTime = getLocalizedContent<string>(article.readTime || "", locale);
 
   const formattedDate = format(new Date(article.createdAt || article.publishedAt || article.date || new Date()), isBangla ? 'd MMM, yyyy' : 'MMM d, yyyy', {

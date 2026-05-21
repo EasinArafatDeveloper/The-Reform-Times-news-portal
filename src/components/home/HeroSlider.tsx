@@ -42,7 +42,7 @@ export default function HeroSlider({ articles, locale }: HeroSliderProps) {
   const title = getLocalizedContent<string>(currentArticle.title, locale);
   const excerpt = getLocalizedContent<string>(currentArticle.excerpt, locale);
   const category = getLocalizedContent<string>(currentArticle.category, locale);
-  const slug = getLocalizedContent<string>(currentArticle.slug, locale);
+  const slug = typeof currentArticle.slug === 'object' ? (currentArticle.slug.en || currentArticle.slug.bn || '') : (currentArticle.slug || '');
   const readTime = getLocalizedContent<string>(currentArticle.readTime || "", locale);
 
   const formattedDate = format(new Date(currentArticle.createdAt || currentArticle.publishedAt || currentArticle.date || new Date()), isBangla ? 'd MMMM, yyyy' : 'MMMM d, yyyy', {

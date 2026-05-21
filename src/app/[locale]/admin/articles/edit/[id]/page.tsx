@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Send, Save, ChevronLeft, Info, CheckCircle2, Clock, Sparkles, Globe, 
   AlertTriangle, Eye, ShieldAlert, Check, Plus, Image as ImageIcon, 
-  PlusCircle, Trash2, Layout, Sliders, Settings, Monitor, Smartphone, Maximize2, X
+  PlusCircle, Trash2, Layout, Sliders, Settings, Monitor, Smartphone, Maximize2, X, Archive
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
@@ -51,6 +51,7 @@ export default function EditArticlePage() {
     location: { country: 'Bangladesh', division: '', district: '', upazila: '' },
     type: 'Standard News',
     status: 'Draft',
+    scheduledAt: '',
     featured: false,
     breaking: false,
     trending: false,
@@ -143,6 +144,7 @@ export default function EditArticlePage() {
           location: data.location || { country: 'Bangladesh', division: '', district: '', upazila: '' },
           type: data.type || 'Standard News',
           status: data.status || 'Draft',
+          scheduledAt: data.scheduledAt || '',
           featured: data.featured || data.isFeatured || false,
           breaking: data.breaking || data.isBreaking || false,
           trending: data.trending || false,
@@ -220,16 +222,46 @@ export default function EditArticlePage() {
     if (!formData.category) return toast.error('Category is required');
     if (!formData.mainImage) return toast.error('Featured image is required');
 
+    if (status === 'Scheduled' && !formData.scheduledAt) {
+      return toast.error('Scheduled date and time is required when status is Scheduled');
+    }
+
+    let confirmTitle = 'Save Draft?';
+    let confirmText = 'This article will be securely saved as an editorial draft.';
+    let confirmBtnText = 'Yes, Save Draft';
+    let confirmColor = '#475569';
+
+    if (status === 'Published') {
+      confirmTitle = 'Publish Dispatch?';
+      confirmText = 'This article will be instantly broadcast to the public bilingual network.';
+      confirmBtnText = 'Yes, Publish Live';
+      confirmColor = '#8B0000';
+    } else if (status === 'Scheduled') {
+      confirmTitle = 'Schedule Dispatch?';
+      const formattedDate = new Date(formData.scheduledAt).toLocaleString();
+      confirmText = `This article will be scheduled to auto-publish on ${formattedDate}.`;
+      confirmBtnText = 'Yes, Schedule Dispatch';
+      confirmColor = '#2563eb';
+    } else if (status === 'Pending Review') {
+      confirmTitle = 'Submit for Review?';
+      confirmText = 'This article will be sent for editorial review.';
+      confirmBtnText = 'Yes, Submit';
+      confirmColor = '#d97706';
+    } else if (status === 'Archived') {
+      confirmTitle = 'Archive Dispatch?';
+      confirmText = 'This article will be archived and hidden from public feeds.';
+      confirmBtnText = 'Yes, Archive';
+      confirmColor = '#7c3aed';
+    }
+
     const confirmResult = await Swal.fire({
-      title: 'Update Article Dispatch?',
-      text: status === 'Published' 
-        ? 'This will instantly broadcast these updates to the live public news feed.'
-        : 'This will save these changes into your draft archive.',
+      title: confirmTitle,
+      text: confirmText,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Yes, Update Dispatch',
+      confirmButtonText: confirmBtnText,
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#8B0000',
+      confirmButtonColor: confirmColor,
       cancelButtonColor: '#475569',
       background: '#151c2c',
       color: '#f8fafc',
@@ -322,6 +354,24 @@ export default function EditArticlePage() {
     </div>
   );
 
+  const getPublishButtonProps = (status: string) => {
+    switch (status) {
+      case 'Published':
+        return { text: 'Publish Dispatch', icon: <Send size={16} />, status: 'Published', colorClass: 'bg-primary hover:bg-primary/95 shadow-primary/20' };
+      case 'Scheduled':
+        return { text: 'Schedule Dispatch', icon: <Clock size={16} />, status: 'Scheduled', colorClass: 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/20' };
+      case 'Pending Review':
+        return { text: 'Submit for Review', icon: <Clock size={16} />, status: 'Pending Review', colorClass: 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/20' };
+      case 'Archived':
+        return { text: 'Archive Dispatch', icon: <Archive size={16} />, status: 'Archived', colorClass: 'bg-purple-600 hover:bg-purple-500 shadow-purple-500/20' };
+      case 'Draft':
+      default:
+        return { text: 'Save Draft', icon: <Save size={16} />, status: 'Draft', colorClass: 'bg-slate-700 hover:bg-slate-600 shadow-slate-700/20' };
+    }
+  };
+
+  const buttonProps = getPublishButtonProps(formData.status);
+
   return (
     <div className="min-h-screen bg-background pb-24 text-body transition-colors">
       
@@ -361,16 +411,19 @@ export default function EditArticlePage() {
               <Save size={16} /> Save Changes
             </button>
             <button 
-              onClick={() => handlePublish('Published')} 
+              onClick={() => handlePublish(buttonProps.status || formData.status)} 
               disabled={isSubmitting} 
-              className="flex-2 sm:flex-none flex items-center justify-center gap-1.5 px-5 md:px-7 py-2 rounded-xl bg-primary text-white font-bold text-xs md:text-sm hover:bg-primary/95 active:scale-95 transition-all shadow-md shadow-primary/20 disabled:opacity-50 cursor-pointer shrink-0"
+              className={cn(
+                "flex-2 sm:flex-none flex items-center justify-center gap-1.5 px-5 md:px-7 py-2 rounded-xl text-white font-bold text-xs md:text-sm active:scale-95 transition-all shadow-md disabled:opacity-50 cursor-pointer shrink-0",
+                buttonProps.colorClass
+              )}
             >
               {isSubmitting ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
-                <Send size={16} />
+                buttonProps.icon
               )}
-              <span>Publish Live</span>
+              <span>{buttonProps.text}</span>
             </button>
           </div>
         </div>
@@ -535,7 +588,7 @@ export default function EditArticlePage() {
                    {/* Simulated Google Listing Card */}
                    <div className="bg-card p-4.5 rounded-xl border border-border shadow-xs space-y-1">
                      <span className="text-xs text-caption block truncate">
-                       https://reformtimes.com/{activeLang}/news/{formData.slug[activeLang] || 'slug'}
+                       https://reformtimes.com/{activeLang}/news/{formData.slug.en || formData.slug.bn || 'slug'}
                      </span>
                      <h3 className="text-lg text-blue-500 dark:text-blue-400 font-sans hover:underline cursor-pointer truncate font-medium">
                        {formData.seoTitle[activeLang] || formData.title[activeLang] || 'Draft Title | The Reform Times'}
@@ -601,11 +654,29 @@ export default function EditArticlePage() {
                       onChange={(e) => handleFieldChange('status', e.target.value)} 
                       className="w-full bg-surface border border-border text-title rounded-xl p-2.5 outline-none text-xs md:text-sm font-bold"
                     >
-                      <option value="Draft">Draft</option>
-                      <option value="Pending Review">Pending Review</option>
-                      <option value="Published">Published</option>
+                      <option value="Draft">Draft (খসড়া)</option>
+                      <option value="Pending Review">Pending Review (পর্যালোচনাধীন)</option>
+                      <option value="Published">Published (প্রকাশিত)</option>
+                      <option value="Scheduled">Scheduled (তফসিলীকৃত)</option>
+                      <option value="Archived">Archived (আর্কাইভড)</option>
                     </select>
                   </div>
+
+                  {formData.status === 'Scheduled' && (
+                    <div className="mt-4 transition-all duration-300 animate-fadeIn bg-surface p-3.5 rounded-xl border border-border">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-caption mb-1.5 block">Scheduled Publish Date & Time</label>
+                      <input 
+                        type="datetime-local" 
+                        value={formData.scheduledAt || ''} 
+                        onChange={(e) => handleFieldChange('scheduledAt', e.target.value)}
+                        className="w-full bg-card border border-border text-title rounded-xl p-2.5 outline-none text-xs font-bold"
+                        required
+                      />
+                      <p className="text-[10px] text-caption mt-1.5 leading-relaxed">
+                        Specify when this article should auto-publish onto the live network.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2 pt-3 border-t border-border/60">
                     <input 

@@ -24,7 +24,15 @@ export default async function FactCheckPage({
   const rawArticles = await db.collection('articles')
     .find({ 
       type: { $in: ['Fact Check', 'fact-check'] }, 
-      status: 'Published' 
+      $and: [
+        {
+          $or: [
+            { status: 'Published' },
+            { status: 'published' },
+            { status: 'Scheduled', scheduledAt: { $lte: new Date().toISOString() } }
+          ]
+        }
+      ]
     })
     .sort({ createdAt: -1 })
     .toArray();
@@ -55,7 +63,7 @@ export default async function FactCheckPage({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {factChecks.map(article => {
               const localizedTitle = getLocalizedContent<string>(article.title, locale);
-              const localizedSlug = getLocalizedContent<string>(article.slug, locale);
+              const localizedSlug = typeof article.slug === 'object' ? (article.slug.en || article.slug.bn || '') : (article.slug || '');
               const localizedExcerpt = getLocalizedContent<string>(article.excerpt, locale);
               
               return (

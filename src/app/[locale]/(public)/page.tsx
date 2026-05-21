@@ -25,7 +25,13 @@ export default async function Home({
   const client = await clientPromise;
   const db = client.db('the-reform-times-news');
   const rawArticles = await db.collection('articles')
-    .find({ status: 'Published' })
+    .find({
+      $or: [
+        { status: 'Published' },
+        { status: 'published' },
+        { status: 'Scheduled', scheduledAt: { $lte: new Date().toISOString() } }
+      ]
+    })
     .sort({ createdAt: -1 })
     .toArray();
 
@@ -283,7 +289,7 @@ export default async function Home({
                     </p>
                   </div>
                 </div>
-                <Link href={`/${locale}/news/${getLocalizedContent<string>(article.slug, locale)}`}>
+                <Link href={`/${locale}/news/${typeof article.slug === 'object' ? (article.slug.en || article.slug.bn || '') : (article.slug || '')}`}>
                   <h3 className={cn("font-serif font-bold text-2xl leading-tight mb-6 group-hover:text-primary transition-colors", i === 0 ? "text-white" : "text-title")}>
                     "{getLocalizedContent<string>(article.title, locale)}"
                   </h3>

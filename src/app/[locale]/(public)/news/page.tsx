@@ -24,7 +24,13 @@ export default async function NewsListingPage({
   const client = await clientPromise;
   const db = client.db('the-reform-times-news');
   const rawArticles = await db.collection('articles')
-    .find({ status: 'Published' })
+    .find({
+      $or: [
+        { status: 'Published' },
+        { status: 'published' },
+        { status: 'Scheduled', scheduledAt: { $lte: new Date().toISOString() } }
+      ]
+    })
     .sort({ createdAt: -1 })
     .toArray();
 

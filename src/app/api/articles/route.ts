@@ -24,26 +24,39 @@ export async function GET(req: NextRequest) {
     let query: any = {};
     if (category && category !== 'All') query.category = category;
     if (type && type !== 'All') query.type = type;
+    // Base status filter for public network
+    let statusFilter: any = null;
     if (status && status !== 'All') {
       query.status = status;
-    }
-    // Note: For public site view (no status query provided or non-admin calls), show only Published articles
-    if (!status) {
-      query.$or = [
-        { status: 'Published' },
-        { status: 'published' }
-      ];
+    } else if (!status) {
+      statusFilter = {
+        $or: [
+          { status: 'Published' },
+          { status: 'published' },
+          { status: 'Scheduled', scheduledAt: { $lte: new Date().toISOString() } }
+        ]
+      };
     }
 
     if (q) {
-      query.$or = [
-        { 'title.bn': { $regex: q, $options: 'i' } },
-        { 'title.en': { $regex: q, $options: 'i' } },
-        { 'excerpt.bn': { $regex: q, $options: 'i' } },
-        { 'excerpt.en': { $regex: q, $options: 'i' } },
-        { 'content.bn': { $regex: q, $options: 'i' } },
-        { 'content.en': { $regex: q, $options: 'i' } }
-      ];
+      const searchFilter = {
+        $or: [
+          { 'title.bn': { $regex: q, $options: 'i' } },
+          { 'title.en': { $regex: q, $options: 'i' } },
+          { 'excerpt.bn': { $regex: q, $options: 'i' } },
+          { 'excerpt.en': { $regex: q, $options: 'i' } },
+          { 'content.bn': { $regex: q, $options: 'i' } },
+          { 'content.en': { $regex: q, $options: 'i' } }
+        ]
+      };
+
+      if (statusFilter) {
+        query.$and = [statusFilter, searchFilter];
+      } else {
+        query.$or = searchFilter.$or;
+      }
+    } else if (statusFilter) {
+      query.$or = statusFilter.$or;
     }
 
     const articles = await db.collection('articles')
@@ -120,8 +133,8 @@ export async function POST(req: NextRequest) {
           });
 
           const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-          const articleUrlBn = `${baseUrl}/bn/news/${newArticle.slug?.bn || ''}`;
-          const articleUrlEn = `${baseUrl}/en/news/${newArticle.slug?.en || ''}`;
+          const articleUrlBn = `${baseUrl}/bn/news/${newArticle.slug?.en || newArticle.slug?.bn || ''}`;
+          const articleUrlEn = `${baseUrl}/en/news/${newArticle.slug?.en || newArticle.slug?.bn || ''}`;
 
           const mailOptions = {
             from: `"The Reform Times Newsroom" <${process.env.SMTP_EMAIL}>`,

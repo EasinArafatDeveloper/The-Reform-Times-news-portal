@@ -26,7 +26,15 @@ export default async function InvestigationsPage({
         { type: { $in: ['Investigation', 'investigation'] } },
         { category: { $in: ['Investigations', 'investigations'] } }
       ],
-      status: 'Published' 
+      $and: [
+        {
+          $or: [
+            { status: 'Published' },
+            { status: 'published' },
+            { status: 'Scheduled', scheduledAt: { $lte: new Date().toISOString() } }
+          ]
+        }
+      ]
     })
     .sort({ createdAt: -1 })
     .toArray();
@@ -56,7 +64,7 @@ export default async function InvestigationsPage({
           <div className="mb-20">
             {(() => {
               const localizedTitle = getLocalizedContent<string>(featured.title, locale);
-              const localizedSlug = getLocalizedContent<string>(featured.slug, locale);
+              const localizedSlug = typeof featured.slug === 'object' ? (featured.slug.en || featured.slug.bn || '') : (featured.slug || '');
               const localizedExcerpt = getLocalizedContent<string>(featured.excerpt, locale);
               const localizedReadTime = getLocalizedContent<string>(featured.readTime, locale);
 
@@ -94,7 +102,7 @@ export default async function InvestigationsPage({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {rest.map(article => {
             const localizedTitle = getLocalizedContent<string>(article.title, locale);
-            const localizedSlug = getLocalizedContent<string>(article.slug, locale);
+            const localizedSlug = typeof article.slug === 'object' ? (article.slug.en || article.slug.bn || '') : (article.slug || '');
             const localizedExcerpt = getLocalizedContent<string>(article.excerpt, locale);
             
             return (

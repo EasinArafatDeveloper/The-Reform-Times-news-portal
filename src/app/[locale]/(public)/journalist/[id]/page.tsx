@@ -55,7 +55,15 @@ export default async function JournalistProfilePage({
         { 'author.name': journalist.name },
         { authorId: journalistId },
       ],
-      status: 'Published'
+      $and: [
+        {
+          $or: [
+            { status: 'Published' },
+            { status: 'published' },
+            { status: 'Scheduled', scheduledAt: { $lte: new Date().toISOString() } }
+          ]
+        }
+      ]
     })
     .sort({ createdAt: -1 })
     .toArray();

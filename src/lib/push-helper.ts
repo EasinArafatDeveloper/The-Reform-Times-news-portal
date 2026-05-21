@@ -44,7 +44,7 @@ export async function sendArticlePushNotification(article: any) {
       if (isBn) {
         title = article.title?.bn || article.title?.en || 'দি রিফর্ম টাইমস';
         bodyText = article.excerpt?.bn || article.excerpt?.en || '';
-        url = `${baseUrl}/bn/news/${article.slug?.bn || article.slug?.en || ''}`;
+        url = `${baseUrl}/bn/news/${article.slug?.en || article.slug?.bn || ''}`;
       } else {
         title = article.title?.en || article.title?.bn || 'The Reform Times';
         bodyText = article.excerpt?.en || article.excerpt?.bn || '';

@@ -43,7 +43,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   const rawArticles = await db.collection('articles')
     .find({
       ...categoryQuery,
-      status: 'Published'
+      $or: [
+        { status: 'Published' },
+        { status: 'published' },
+        { status: 'Scheduled', scheduledAt: { $lte: new Date().toISOString() } }
+      ]
     })
     .sort({ createdAt: -1 })
     .toArray();
