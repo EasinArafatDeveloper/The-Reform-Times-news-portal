@@ -5,10 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 
-export const metadata = {
-  title: "Fact Check Center | The Reform Times",
-  description: "Dedicated to verifying claims and combating misinformation in digital media.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isBangla = locale === 'bn';
+  return {
+    title: isBangla ? "তথ্য যাচাই কেন্দ্র | দি রিফর্ম টাইমস" : "Fact Check Center | The Reform Times",
+    description: isBangla 
+      ? "ডিজিটাল মিডিয়া ও খবরের সত্যতা যাচাইকরণ এবং ভুল তথ্যের অপপ্রচার রুখতে আমাদের সচিত্র যাচাই প্রতিবেদন।" 
+      : "Dedicated to verifying claims and combating misinformation in digital media.",
+  };
+}
 
 export default async function FactCheckPage({
   params,

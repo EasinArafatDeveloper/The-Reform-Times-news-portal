@@ -7,10 +7,16 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
 
-export const metadata = {
-  title: "Latest News | The Reform Times",
-  description: "Browse the latest news, investigations, and reports from The Reform Times.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isBangla = locale === 'bn';
+  return {
+    title: isBangla ? "সর্বশেষ সংবাদ | দি রিফর্ম টাইমস" : "Latest News | The Reform Times",
+    description: isBangla 
+      ? "দি রিফর্ম টাইমস-এর সর্বশেষ সংবাদ, অনুসন্ধানী প্রতিবেদন, বিশ্ব সংবাদ ও মতামত বিশ্লেষণ পড়ুন।" 
+      : "Browse the latest news, investigations, and reports from The Reform Times.",
+  };
+}
 
 export default async function NewsListingPage({
   params,

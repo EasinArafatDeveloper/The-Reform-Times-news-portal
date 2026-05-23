@@ -5,10 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { PlayCircle } from "lucide-react";
 
-export const metadata = {
-  title: "Video Journalism | The Reform Times",
-  description: "Watch our latest video reports, documentaries, and interviews.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isBangla = locale === 'bn';
+  return {
+    title: isBangla ? "ভিডিও সাংবাদিকতা | দি রিফর্ম টাইমস" : "Video Journalism | The Reform Times",
+    description: isBangla 
+      ? "দি রিফর্ম টাইমস-এর সর্বশেষ ভিডিও প্রতিবেদন, অনুপ্রেরণামূলক তথ্যচিত্র এবং সাক্ষাৎকার দেখুন।" 
+      : "Watch our latest video reports, documentaries, and interviews.",
+  };
+}
 
 export default async function VideoPage({
   params,

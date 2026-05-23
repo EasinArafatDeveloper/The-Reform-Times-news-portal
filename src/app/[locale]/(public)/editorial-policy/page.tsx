@@ -1,10 +1,16 @@
 import React from 'react';
 import { Shield, CheckCircle, FileText, Lock, Eye } from 'lucide-react';
 
-export const metadata = {
-  title: "Editorial Policy | The Reform Times",
-  description: "Learn about our strict ethical standards and publishing guidelines.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isBangla = locale === 'bn';
+  return {
+    title: isBangla ? "সম্পাদকীয় নীতিমালা | দি রিফর্ম টাইমস" : "Editorial Policy | The Reform Times",
+    description: isBangla 
+      ? "দি রিফর্ম টাইমস-এর আপসহীন সম্পাদকীয় নীতিমালা, সততা এবং সংবাদ প্রকাশের নৈতিকতা সম্পর্কে জানুন।" 
+      : "Learn about our strict ethical standards and publishing guidelines.",
+  };
+}
 
 export default async function EditorialPolicyPage({
   params,

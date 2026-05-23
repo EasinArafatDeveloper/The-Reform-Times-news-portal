@@ -1,10 +1,16 @@
 import React from 'react';
 import { Briefcase, Heart, Users, Mail } from 'lucide-react';
 
-export const metadata = {
-  title: "Careers | The Reform Times",
-  description: "Join our team of independent journalists and advocates.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isBangla = locale === 'bn';
+  return {
+    title: isBangla ? "আমাদের সাথে কাজ করুন | দি রিফর্ম টাইমস" : "Careers | The Reform Times",
+    description: isBangla 
+      ? "স্বাধীন সাংবাদিকতা ও সামাজিক সংস্কারের ক্ষেত্রে আপনার অবদান রাখার সুবর্ণ সুযোগ।" 
+      : "Join our team of independent journalists and advocates.",
+  };
+}
 
 export default async function CareersPage({
   params,

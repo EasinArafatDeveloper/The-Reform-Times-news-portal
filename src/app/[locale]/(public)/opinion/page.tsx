@@ -4,10 +4,16 @@ import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
 import Image from "next/image";
 import Link from "next/link";
 
-export const metadata = {
-  title: "Opinion & Editorial | The Reform Times",
-  description: "Expert analysis, editorials, and opinion pieces from our contributors.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isBangla = locale === 'bn';
+  return {
+    title: isBangla ? "মতামত ও বিশ্লেষণ | দি রিফর্ম টাইমস" : "Opinion & Editorial | The Reform Times",
+    description: isBangla 
+      ? "দি রিফর্ম টাইমস-এর লেখক ও বিশেষজ্ঞদের কলাম, বিশ্লেষণ, সম্পাদকীয় এবং সুচিন্তিত মতামত।" 
+      : "Expert analysis, editorials, and opinion pieces from our contributors.",
+  };
+}
 
 export default async function OpinionPage({
   params,

@@ -3,10 +3,16 @@ import clientPromise from "@/lib/mongodb";
 import { Mail, Shield, Target, Compass, Award, Star, Quote, ArrowRight } from "lucide-react";
 import Link from 'next/link';
 
-export const metadata = {
-  title: "About Us | The Reform Times",
-  description: "Learn about our mission, vision, and Kazi Salman, our Editor-in-Chief.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isBangla = locale === 'bn';
+  return {
+    title: isBangla ? "আমাদের সম্পর্কে | দি রিফর্ম টাইমস" : "About Us | The Reform Times",
+    description: isBangla 
+      ? "আমাদের উদ্দেশ্য, লক্ষ্য এবং দ্য রিফর্ম টাইমসের প্রধান সম্পাদক ও প্রতিষ্ঠাতা কাজী সালমান সম্পর্কে জানুন।" 
+      : "Learn about our mission, vision, and Kazi Salman, our Editor-in-Chief & Founder.",
+  };
+}
 
 export default async function AboutPage({
   params,

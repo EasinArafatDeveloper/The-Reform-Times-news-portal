@@ -4,10 +4,16 @@ import { getLocalizedContent, getTranslation } from "@/lib/i18n-utils";
 import Image from "next/image";
 import Link from "next/link";
 
-export const metadata = {
-  title: "Investigations | The Reform Times",
-  description: "Exclusive investigative reports uncovering corruption, fraud, and abuse of power.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isBangla = locale === 'bn';
+  return {
+    title: isBangla ? "অনুসন্ধানী প্রতিবেদন | দি রিফর্ম টাইমস" : "Investigations | The Reform Times",
+    description: isBangla 
+      ? "দুর্নীতি, অনিয়ম, জালিয়াতি এবং ক্ষমতার অপব্যবহার উন্মোচনে আমাদের এক্সক্লুসিভ অনুসন্ধানী প্রতিবেদন।" 
+      : "Exclusive investigative reports uncovering corruption, fraud, and abuse of power.",
+  };
+}
 
 export default async function InvestigationsPage({
   params,

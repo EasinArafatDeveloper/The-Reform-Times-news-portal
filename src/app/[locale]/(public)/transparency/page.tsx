@@ -1,10 +1,16 @@
 import React from 'react';
 import { Eye, Shield, Award, DollarSign } from 'lucide-react';
 
-export const metadata = {
-  title: "Transparency Report | The Reform Times",
-  description: "Read our transparency commitment and funding sources.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isBangla = locale === 'bn';
+  return {
+    title: isBangla ? "স্বচ্ছতা প্রতিবেদন | দি রিফর্ম টাইমস" : "Transparency Report | The Reform Times",
+    description: isBangla 
+      ? "দি রিফর্ম টাইমস-এর স্বচ্ছতা, নিরপেক্ষতা এবং অর্থায়নের উৎস সম্পর্কিত প্রতিবেদন পড়ুন।" 
+      : "Read our transparency commitment and funding sources.",
+  };
+}
 
 export default async function TransparencyPage({
   params,
